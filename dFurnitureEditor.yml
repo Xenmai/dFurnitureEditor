@@ -1,0 +1,461 @@
+dFurnitureEditor_Version: 
+  type: version 
+  author: Xenmai
+  name: dFurnitureEditor 
+  version: 0.4 
+  description: An advanced menu for editing and placing/removing furniture props 
+  id: 98
+#   ___   ___   ___  ___ ___  ___  ___  __  __ ____       __    ___ ____  __ ____  ______  __ 
+#  //    // \\  ||\\//|| ||\\//|| // \\ ||\ || || \\     (( \  //   || \\ || || \\ | || | (( \
+# ((    ((   )) || \/ || || \/ || ||=|| ||\\|| ||  ))     \\  ((    ||_// || ||_//   ||    \\ 
+#  \\__  \\_//  ||    || ||    || || || || \|| ||_//     \_))  \\__ || \\ || ||      ||   \_))
+#
+dFurnitureEditor:
+  type: command
+  name: dfe
+  description: "Main dFE command. Allows for editing and placing props."
+  usage: /dfe [edit|place]
+  aliases:
+    - dfurnitureeditor
+  allowed help: 
+    - determine <player.is_op||<context.server>> 
+  tab complete: 
+    - if !<player.is_op||<context.server>> queue clear 
+    - determine <li@edit|place.filter[starts_with[<context.args.last>]]>
+  script:
+  
+    - if !<player.is_op||<context.server>> { 
+      - narrate "<red>You do not have permission for that command." 
+      - queue clear 
+      } 
+    - choose <context.args.get[1]>:
+      
+      # Opens the general dFE inventory GUI
+      - case edit:
+        - flag player CreateProp:!
+        - flag player DeleteProp:!
+        - flag player CreatePart:!
+        - flag player DeletePart:!
+        - flag player SetLocation:!
+        - flag player SetAngle:!
+        - flag player SetItem:!
+        - flag player SetType:!
+        - inventory open d:in@Editor_Menu
+      
+      # Places a prop at your current location.
+      # For example, "/dfe place Stool" will place a created prop called Stool. 
+      - case place:
+        - define loc <player.location.block.center>
+        - define yaw <player.location.yaw>
+        #- light <def[loc].below> <def[loc].light>        
+        - foreach <yaml[props].list_keys[<context.args.get[2]>]> {
+          - define location l@<yaml[props].read[<context.args.get[2]>.<def[value]>.location]>
+          - define angle <yaml[props].read[<context.args.get[2]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]>
+          - define small <yaml[props].read[<context.args.get[2]>.<def[value]>.small]>
+          - define item <yaml[props].read[<context.args.get[2]>.<def[value]>.item]>
+          - define type <yaml[props].read[<context.args.get[2]>.<def[value]>.type]>
+          - spawn armor_stand[visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[props].read[<context.args.get[2]>]>
+          - if <def[type].is[==].to[sit]> {
+            - flag <entry[<yaml[props].read[<context.args.get[2]>]>].spawned_entities.after[li@]> sit
+          }
+          else if <def[type].is[==].to[fire]> {
+            - flag <entry[<yaml[props].read[<context.args.get[2]>]>].spawned_entities.after[li@]> fire
+          }
+          - define entities <def[entities]>|<entry[<yaml[props].read[<context.args.get[2]>]>].spawned_entities.after[li@]>
+        }
+        - define entities <def[entities].after[<&pipe>].as_list>
+        - flag server <context.args.get[2]>_<def[loc]>:->:<def[entities]>
+        - narrate "Placed <context.args.get[2]> at <def[loc]>!"
+      
+      # Removes a prop at your current location.
+      # For example, "/dfe remove Stool" will remove a placed Stool at your location.       
+      - case remove:
+        - define loc <player.location.block.center>
+        - remove <server.flag[<context.args.get[2]>_<def[loc]>]>
+        #- light <def[loc].below> reset
+        - flag server <context.args.get[2]>_<def[loc]>:!
+        - narrate "Removed <context.args.get[2]> at <def[loc].simple>!"
+                
+      - default:
+      
+        - narrate "<&c>Invalid argument specified!"
+    
+# __    __   ___   ____  __    ____       __    ___ ____  __ ____  ______  __ 
+# ||    ||  // \\  || \\ ||    || \\     (( \  //   || \\ || || \\ | || | (( \
+# \\ /\ // ((   )) ||_// ||    ||  ))     \\  ((    ||_// || ||_//   ||    \\ 
+#  \V/\V/   \\_//  || \\ ||__| ||_//     \_))  \\__ || \\ || ||      ||   \_))
+#
+dFE_Listener: 
+  type: world
+  debug: true
+  events:
+    
+    # Loads the file, or creates it if it doesn't exist yet.
+    on server start:
+    
+      - if <server.has_file[/dFurnitureEditor/props.yml]> {
+        - yaml "load:/dFurnitureEditor/props.yml" id:props
+      }
+      else {
+        - yaml create id:props
+        
+        - yaml id:props set props:->:Stool
+        
+        - define part li@Leg1|Leg2|Leg3|Leg4|Plank|Sitting
+        - define location li@-0.1,-2.4,0.25|-0.25,-2.4,-0.1|0.1,-2.4,-0.25|0.25,-2.4,0.1|0,-1.35,0|0,-1.65,0
+        - define angle li@0,0,0|0,90,0|0,180,0|0,270,0|0,0,0|0,0,0
+        - define small li@false|false|false|false|false|false
+        - define item li@stick|stick|stick|stick|wood_plate|air
+        - define type li@normal|normal|normal|normal|normal|sit
+        
+        - repeat 6 {
+          - yaml id:props set Stool.<def[part].get[<def[value]>]>.location:<def[location].get[<def[value]>]>
+          - yaml id:props set Stool.<def[part].get[<def[value]>]>.angle:<def[angle].get[<def[value]>]>
+          - yaml id:props set Stool.<def[part].get[<def[value]>]>.small:<def[small].get[<def[value]>]>
+          - yaml id:props set Stool.<def[part].get[<def[value]>]>.item:<def[item].get[<def[value]>]>
+          - yaml id:props set Stool.<def[part].get[<def[value]>]>.type:<def[type].get[<def[value]>]>
+        }
+        
+        - yaml id:props set props:->:Log
+        
+        - define part li@Log1|Log2|Log3|Log4|Log5|Sitting1|Sitting2|Sitting3
+        - define location li@0,-1.6,1|0,-1.6,0.375|0,-1.6,-0.25|0,-1.6,-0.875|0,-1.6,-1.5|0,-1.6,1|0,-1.6,0|0,-1.6,-1
+        - define angle li@90,0,0|90,0,0|90,0,0|90,0,0|90,0,0|0,0,0|0,0,0|0,0,0
+        - define small li@false|false|false|false|false|false|false|false
+        - define item li@log|log|log|log|log|air|air|air
+        - define type li@normal|normal|normal|normal|normal|sit|sit|sit
+        
+        - repeat 8 {
+          - yaml id:props set Log.<def[part].get[<def[value]>]>.location:<def[location].get[<def[value]>]>
+          - yaml id:props set Log.<def[part].get[<def[value]>]>.angle:<def[angle].get[<def[value]>]>
+          - yaml id:props set Log.<def[part].get[<def[value]>]>.small:<def[small].get[<def[value]>]>
+          - yaml id:props set Log.<def[part].get[<def[value]>]>.item:<def[item].get[<def[value]>]>
+          - yaml id:props set Log.<def[part].get[<def[value]>]>.type:<def[type].get[<def[value]>]>
+        }
+        
+        - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+      }
+    
+    # Saves and unloads the data.
+    on shutdown:
+    
+      - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+      - yaml unload id:props
+    
+    # Places a created prop.
+    on place command:
+    
+      - determine passively fulfilled
+      
+    # Listener for the Editor Menu. Prevents clicking items.
+    on player clicks in Editor_Menu:
+      - determine passively cancelled
+      - choose <context.slot>:
+      
+        - case 1:
+          - inventory close
+        
+        - case 3:
+          - inventory close
+          - narrate "Enter name for the new prop."
+          - flag player CreateProp
+        
+        - case 4:
+          - inventory close
+          - narrate "Enter name of the prop to delete."
+          - flag player DeleteProp
+        
+        - default:
+          - if <context.item.material> == m@workbench {
+            - inventory close
+            - flag player Editing1:<context.item.display.strip_color>
+            - inventory open d:in@Prop_Menu
+          }
+    
+    # Prevents dragging items.
+    on player drags in Editor_Menu:
+    
+      - determine cancelled
+    
+    # Listener for the Prop Menu. Prevents clicking items.
+    on player clicks in Prop_Menu:
+    
+      - determine passively cancelled
+      - choose <context.slot>:
+      
+        - case 1:
+          - inventory close
+          - inventory open d:in@Editor_Menu
+          
+        - case 3:
+          - inventory close
+          - narrate "Enter name for the new part."
+          - flag player CreatePart
+        
+        - case 4:
+          - inventory close
+          - narrate "Enter name of the part to delete."
+          - flag player DeletePart
+        
+        - default:
+          - if <context.item.material> == m@armor_stand {
+            - inventory close
+            - flag player Editing2:<context.item.display.strip_color>
+            - inventory open d:in@Part_Menu
+          }
+    
+    # Prevents dragging items.    
+    on player drags in Prop_Menu:
+    
+      - determine cancelled
+
+    # Listener for the Part Menu. Prevents clicking items.
+    on player clicks in Part_Menu:
+    
+      - determine passively cancelled
+      - choose <context.slot>:
+        
+        - case 3:
+          - inventory close
+          - narrate "Enter location offset value as x,y,z."
+          - flag player SetLocation
+        
+        - case 4:
+          - inventory close
+          - narrate "Enter head angle values as a,b,c."
+          - flag player SetAngle 
+        
+        - case 5:
+          - inventory close
+          - narrate "Small state toggled."
+          - if <yaml[props].read[<player.flag[Editing1]>.<player.flag[Editing2]>.small]> == true {
+            - yaml id:props set <player.flag[Editing1]>.<player.flag[Editing2]>.small:false
+          }
+          else {
+            - yaml id:props set <player.flag[Editing1]>.<player.flag[Editing2]>.small:true
+          }
+          - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+          - inventory open d:in@Part_Menu
+        
+        - case 6:
+          - inventory close
+          - narrate "Enter name of item to equip."
+          - flag player SetItem
+        
+        - case 7:
+          - inventory close
+          - narrate "Enter type of the element (normal, sit and fire allowed)."
+          - flag player SetType
+        
+        - case 1:
+          - inventory close
+          - inventory open d:in@Prop_Menu
+    
+    # Prevents dragging items.
+    on player drags in Part_Menu:
+    
+      - determine cancelled
+    
+    # Listens to the chat as input for names and values.
+    on player chats:
+    
+      # Enter name for the new prop.
+      - if <player.has_flag[CreateProp]> {
+        - determine passively cancelled
+        - if <yaml[props].read[props].contains[<context.message>]> {
+          - narrate "Prop name <context.message> already in use!"
+        }
+        else {
+          - yaml id:props set props:->:<context.message>
+          - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+          - narrate "Prop <context.message> created!"
+        }
+        - flag player CreateProp:!
+        - inventory open d:in@Editor_Menu
+      }
+      
+      # Enter name of prop to delete.
+      else if <player.has_flag[DeleteProp]> {
+        - determine passively cancelled
+        - if <yaml[props].read[props].contains[<context.message>]> {
+          - yaml id:props set props:<-:<context.message>
+          - yaml id:props set <context.message>:!
+          - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+          - narrate "Prop <context.message> deleted!"
+        }
+        else {
+          - narrate "Prop <context.message> doesn't exist!"
+        }
+        - flag player DeleteProp:!
+        - inventory open d:in@Editor_Menu
+      }
+      
+      # Enter name for the new part.
+      else if <player.has_flag[CreatePart]> {
+        - determine passively cancelled
+        - if <yaml[props].list_keys[<player.flag[Editing1]>].contains[<context.message>]> {
+          - narrate "Part name already in use!"
+        }
+        else {
+          - yaml id:props set <player.flag[Editing1]>.<context.message>.location:0,0,0
+          - yaml id:props set <player.flag[Editing1]>.<context.message>.angle:0,0,0
+          - yaml id:props set <player.flag[Editing1]>.<context.message>.small:false
+          - yaml id:props set <player.flag[Editing1]>.<context.message>.item:stone
+          - yaml id:props set <player.flag[Editing1]>.<context.message>.type:normal
+          - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+          - narrate "Part <context.message> created!"
+        }
+        - flag player CreatePart:!
+        - inventory open d:in@Prop_Menu
+      }
+      
+      # Enter name of part to delete.
+      else if <player.has_flag[DeletePart]> {
+        - determine passively cancelled
+        - if <yaml[props].list_keys[<player.flag[Editing1]>].contains[<context.message>]> {
+          - yaml id:props set <player.flag[Editing1]>.<context.message>:!
+          - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+          - narrate "Part <context.message> deleted!"
+        }
+        else {
+          - narrate "Part <context.message> doesn't exist!"
+        }
+        - flag player DeletePart:!
+        - inventory open d:in@Prop_Menu
+      }
+      
+      # Enter location offset value as x,y,z.
+      else if <player.has_flag[SetLocation]> {
+        - determine passively cancelled
+        - yaml id:props set <player.flag[Editing1]>.<player.flag[Editing2]>.location:<context.message>
+        - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+        - narrate "Location offset set to <context.message>!"
+        - flag player SetLocation:!
+        - inventory open d:in@Part_Menu
+      }
+      
+      # Enter head angle values as a,b,c.
+      else if <player.has_flag[SetAngle]> {
+        - determine passively cancelled
+        - yaml id:props set <player.flag[Editing1]>.<player.flag[Editing2]>.angle:<context.message>
+        - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+        - narrate "Rotation angle set to <context.message>!"
+        - flag player SetAngle:!
+        - inventory open d:in@Part_Menu
+      }
+      
+      # Enter item name to equip.
+      else if <player.has_flag[SetItem]> {
+        - determine passively cancelled
+        - if <li@sit|fire.contains[<yaml[props].read[<player.flag[Editing1]>.<player.flag[Editing2]>.type]>]> {
+          - narrate "You can't give an item to a this type of element! Please change the element type to normal first."
+          - queue clear
+        }
+        - yaml id:props set <player.flag[Editing1]>.<player.flag[Editing2]>.item:<context.message>
+        - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+        - narrate "Item name set to <context.message>!"
+        - flag player SetItem:!
+        - inventory open d:in@Part_Menu
+      }
+      
+      # Enter element type.
+      else if <player.has_flag[SetType]> {
+        - determine passively cancelled
+        - if <li@normal|sit|fire.contains[<context.message>].not> {
+          - narrate "Invalid element type! Valid types are normal, sit and fire."
+          - queue clear
+        }
+        - if <li@sit|fire.contains[<context.message>]> {
+          - yaml id:props set <player.flag[Editing1]>.<player.flag[Editing2]>.item:air
+          - narrate "Element item set to air!"
+        }
+        - yaml id:props set <player.flag[Editing1]>.<player.flag[Editing2]>.type:<context.message>
+        - yaml "savefile:/dFurnitureEditor/props.yml" id:props
+        - narrate "Element type set to <context.message>!"
+        - flag player SetType:!
+        - inventory open d:in@Part_Menu
+      }
+    
+    # Listener for sitting components in placed props.
+    on player right clicks at entity:
+      - determine passively cancelled
+      - define entity <context.entity.location.find.entities[armor_stand].within[2.0].filter[has_flag[sit]].get[1]>
+      - if <def[entity]||null> == null {
+        - queue clear
+      }
+      - mount <player>|<def[entity]> <def[entity].location.with_pose[0,<player.location.yaw.add[180]>]>
+    
+    # Listener for fire components in placed props.
+    on system time minutely:
+      - foreach <w@world.entities.filter[has_flag[fire]]> {
+        - define entity <def[value]>
+        - repeat 120 {
+          - if <def[entity].is_spawned.not||true> {
+            - queue clear
+          }
+          - if <def[entity].location.find.entities[player].within[16].size.is[MORE].than[0]> {
+            - playeffect <def[entity].location> effect:flame data:0.001 quantity:5 offset:0.1,0.1,0.1
+          }
+          - wait 10t
+        }
+      }
+    
+    # BC's data tracker.
+    on system time hourly:
+      - webget "http://morphanone.space/webizen.aspx/tracker?script=98&players=<server.list_online_players.size>"
+      
+# __ __  __ __ __  ____ __  __ ______   ___   ____  _  _     __    ___ ____  __ ____  ______  __ 
+# || ||\ || || || ||    ||\ || | || |  // \\  || \\ \\//    (( \  //   || \\ || || \\ | || | (( \
+# || ||\\|| \\ // ||==  ||\\||   ||   ((   )) ||_//  )/      \\  ((    ||_// || ||_//   ||    \\ 
+# || || \||  \V/  ||___ || \||   ||    \\_//  || \\ //      \_))  \\__ || \\ || ||      ||   \_))
+#
+Editor_Menu:
+  type: inventory
+  inventory: chest
+  size: 54
+  title: "Editor Menu"
+  slots:
+    - "[i@green_wool[display_name=<&b>Exit]] [i@air] [] [] [i@air] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+  procedural items: 
+  - define items "li@i@blue_wool[display_name=<&b>Create a new prop]|i@red_wool[display_name=<&b>Delete a prop]"
+  - foreach <yaml[props].read[props].as_list.alphanumeric> {
+    - define items "<def[items].include[i@workbench[display_name=<&b><def[value]>;lore=<&d>Parts:|<yaml[props].list_keys[<def[value]>].as_list.alphanumeric.after[li@]||None>]]>" 
+  }
+  - determine <def[items]>
+
+Prop_Menu:
+  type: inventory
+  inventory: chest
+  size: 54
+  title: "Prop Menu"
+  slots:
+    - "[i@green_wool[display_name=<&b>Return]] [i@air] [] [] [i@air] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+    - "[] [] [] [] [] [] [] [] []"
+  procedural items: 
+  - define items "li@i@blue_wool[display_name=<&b>Create a new part]|i@red_wool[display_name=<&b>Delete a part]"
+  - if <yaml[props].list_keys[<player.flag[Editing1]>].as_list.alphanumeric||null> != null {
+    - foreach <yaml[props].list_keys[<player.flag[Editing1]>].as_list.alphanumeric> {
+      - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Location: <&5><&o><yaml[props].read[<player.flag[Editing1]>.<def[value]>.location]>|<&d>Angle: <&5><&o><yaml[props].read[<player.flag[Editing1]>.<def[value]>.angle]>|<&d>Small: <&5><&o><yaml[props].read[<player.flag[Editing1]>.<def[value]>.small]>|<&d>Item: <&5><&o><yaml[props].read[<player.flag[Editing1]>.<def[value]>.item]>|<&d>Type: <&5><&o><yaml[props].read[<player.flag[Editing1]>.<def[value]>.type]>]]>" 
+    }
+  }
+  - determine <def[items]>
+  
+Part_Menu:
+  type: inventory
+  inventory: chest
+  size: 9
+  title: "Part Menu"
+  slots:
+    - "[i@green_wool[display_name=<&b>Return]] [i@air] [] [] [] [] [] [] []"
+  procedural items: 
+  - define items "li@i@paper[display_name=<&b>Location;lore=li@<yaml[props].read[<player.flag[Editing1]>.<player.flag[Editing2]>.location]>]|i@paper[display_name=<&b>Angle;lore=li@<yaml[props].read[<player.flag[Editing1]>.<player.flag[Editing2]>.angle]>]|i@paper[display_name=<&b>Small;lore=li@<yaml[props].read[<player.flag[Editing1]>.<player.flag[Editing2]>.small]>]|i@paper[display_name=<&b>Item;lore=li@<yaml[props].read[<player.flag[Editing1]>.<player.flag[Editing2]>.item]>]|i@paper[display_name=<&b>Type;lore=li@<yaml[props].read[<player.flag[Editing1]>.<player.flag[Editing2]>.type]>]"
+  - determine <def[items]>
