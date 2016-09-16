@@ -2,7 +2,7 @@ dFurnitureEditor_Version:
   type: version 
   author: Xenmai
   name: dFurnitureEditor 
-  version: 0.5.2
+  version: 0.7
   description: An advanced menu for editing and placing/removing furniture props 
   id: 98
   
@@ -87,7 +87,7 @@ dFE_Command:
 
 dFE_Task_Place:
   type: task
-  debug: false
+  debug: true
   definitions: loc|yaw|model
   script:
     #- light <def[loc].below> <def[loc].light>        
@@ -104,11 +104,11 @@ dFE_Task_Place:
       else if <def[type].is[==].to[fire]> {
         - flag <entry[<yaml[props].read[<def[model]>]>].spawned_entities.after[li@]> fire
       }
-      - define entities <def[entities]>|<entry[<yaml[props].read[<def[model]>]>].spawned_entities.after[li@]>
+      - define entities <def[entities]||>|<entry[<yaml[props].read[<def[model]>]>].spawned_entities.after[li@]>
     }
     - define entities <def[entities].after[<&pipe>].as_list>
-    - flag server <def[model]>_<def[loc]>:->:<def[entities]>
-    - narrate "Placed <def[model]> at <def[loc]>!"
+    - flag server <def[model]>_<def[loc].simple>:->:<def[entities]>
+    - narrate "Placed <def[model]> at <def[loc].simple>!"
 
 dFE_Task_Remove:
   type: task
@@ -116,9 +116,9 @@ dFE_Task_Remove:
   definitions: loc|model
   script:
     #- light <def[loc].below> reset
-    - remove <server.flag[<def[model]>_<def[loc]>]>
-    - flag server <def[model]>_<def[loc]>:!
-    - narrate "Removed <def[model]> at <def[loc]>!"
+    - remove <server.flag[<def[model]>_<def[loc].simple>]>
+    - flag server <def[model]>_<def[loc].simple>:!
+    - narrate "Removed <def[model]> at <def[loc].simple>!"
 
 # __          __        _     _    _____           _       _        
 # \ \        / /       | |   | |  / ____|         (_)     | |       
