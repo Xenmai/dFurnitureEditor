@@ -4,7 +4,7 @@ Staff pick as of: 2016/07/12 13:01:15 UTC-07:00 (67 days and 16 hours ago)
 
 Denizen Version: Release Build #1623 
 
-Script Version: 0.8 
+Script Version: 0.8.2
 
 Description:
 
