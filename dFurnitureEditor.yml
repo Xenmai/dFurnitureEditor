@@ -2,7 +2,7 @@ dFurnitureEditor_Version:
   type: version 
   author: Xenmai
   name: dFurnitureEditor 
-  version: 0.8.2
+  version: 0.8.3
   description: An advanced menu for editing and placing/removing furniture Models 
   id: 98
   
@@ -119,7 +119,7 @@ dFE_Command:
         - run dFE_Task_Move def:<context.args.get[2]>|<player.location.block> instantly
       }
       else {
-        - narrate "Invalid second argument specified. Please use -s or an integer."
+        - narrate "Invalid second argument specified. Please use -s or a positive integer."
       }
     
     # Rotates a placed drop to a yaw.
@@ -246,8 +246,8 @@ dFE_Task_Remove:
   definitions: id
   script:
     
-  - if <def[id].is[==].to[<def[id].as_int>].not> {
-    - narrate "Invalid ID specified. Please use an integer."
+  - if <def[id].is[==].to[<def[id].as_int>].not> || <def[id].is[LESS].to[0]> {
+    - narrate "Invalid ID specified. Please use a positive integer."
     - queue clear
   }
   - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>].not> {
@@ -267,8 +267,12 @@ dFE_Task_Select:
   definitions: id
   script:
     
-  - if <def[id].is[==].to[<def[id].as_int>].not> {
-    - narrate "Invalid ID specified. Please use an integer."
+  - if <def[id].is[==].to[<def[id].as_int>].not> || <def[id].is[LESS].to[0]> {
+    - narrate "Invalid ID specified. Please use a positive integer."
+    - queue clear
+  }
+  - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>].not> {
+    - narrate "Placed prop with ID <def[id]> doesn't exist. Make sure you're specifying the correct ID."
     - queue clear
   }
   
@@ -282,8 +286,8 @@ dFE_Task_Move:
   definitions: id|loc
   script:
     
-  - if <def[id].is[==].to[<def[id].as_int>].not> {
-    - narrate "Invalid ID specified. Please use an integer."
+  - if <def[id].is[==].to[<def[id].as_int>].not> || <def[id].is[LESS].to[0]> {
+    - narrate "Invalid ID specified. Please use a positive integer."
     - queue clear
   }
   - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>].not> {
@@ -308,8 +312,8 @@ dFE_Task_Rotate:
   definitions: id|yaw
   script:
     
-  - if <def[id].is[==].to[<def[id].as_int>].not> {
-    - narrate "Invalid ID specified. Please use an integer."
+  - if <def[id].is[==].to[<def[id].as_int>].not> || <def[id].is[LESS].to[0]> {
+    - narrate "Invalid ID specified. Please use a positive integer."
     - queue clear
   }
   - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>].not> {
@@ -438,6 +442,22 @@ dFE_Task_Update:
   
   - narrate "Updated all placed props <def[model]> props."
 
+# Plays fire in an entity position for a minute.
+dFE_Task_Fire:
+  type: task
+  debug: true
+  definitions: entity
+  script:
+  
+    - repeat 119 {
+      - if <def[entity].is_spawned.not||true> {
+        - queue clear
+      }
+      - if <def[entity].location.find.entities[player].within[16].size.is[MORE].than[0]> {
+        - playeffect <def[entity].location> effect:flame data:0.001 quantity:5 offset:0.1,0.1,0.1
+      }
+      - wait 10t
+    }
 # __          __        _     _    _____           _       _        
 # \ \        / /       | |   | |  / ____|         (_)     | |       
 #  \ \  /\  / /__  _ __| | __| | | (___   ___ _ __ _ _ __ | |_ ___  
@@ -559,6 +579,7 @@ dFE_World:
           else {
             - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small:true
           }
+          - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
           - inventory open d:in@Part_Menu
         
         - case 6:
@@ -722,20 +743,16 @@ dFE_World:
     
     # Listener for fire components in placed Models.
     on system time minutely:
-      - foreach <w@world.entities.filter[has_flag[dFE_Fire]]> {
-        - define entity <def[value]>
-        - repeat 120 {
-          - if <def[entity].is_spawned.not||true> {
-            - queue clear
+      - foreach <yaml[dFE_Placed_Props].list_keys[]> {
+        - foreach <yaml[dFE_Placed_Props].read[<def[value]>.entities]> {
+          - define entity <def[value]>
+          - if <def[entity].has_flag[dFE_Fire]> {
+            - run dFE_Task_Fire def:<def[entity]> instantly
           }
-          - if <def[entity].location.find.entities[player].within[16].size.is[MORE].than[0]> {
-            - playeffect <def[entity].location> effect:flame data:0.001 quantity:5 offset:0.1,0.1,0.1
-          }
-          - wait 10t
         }
       }
-    
-    # BC's data tracker.
+      
+    # Hourly backups to avoid data loss on server crash. Also BC's script-tracker.
     on system time hourly:
       - webget "http://stats.denizenscript.com/tracker?script=98&players=<server.list_online_players.size>&script_version=0.8.2&models=<yaml[dFE_Models].read[Models].size>&placed_props=<yaml[dFE_Placed_Props].list_keys[].size>&tps=<server.recent_tps>"
       
