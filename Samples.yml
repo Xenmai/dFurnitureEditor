@@ -1,3 +1,58 @@
+Campfire:
+  Stick6:
+    small: 'true'
+    item: stick
+    angle: 0,-135,0
+    location: 0.21,-1.575,-0.05
+    type: normal
+  Stick7:
+    small: 'true'
+    item: stick
+    angle: 0,-90,0
+    location: 0.185,-1.575,0.125
+    type: normal
+  Stick4:
+    small: 'true'
+    item: stick
+    angle: 0,135,0
+    location: -0.05,-1.575,-0.21
+    type: normal
+  Stick5:
+    small: 'true'
+    item: stick
+    angle: 0,180,0
+    location: 0.125,-1.575,-0.185
+    type: normal
+  Stick2:
+    small: 'true'
+    item: stick
+    angle: 0,45,0
+    location: -0.21,-1.575,0.05
+    type: normal
+  Stick3:
+    small: 'true'
+    item: stick
+    angle: 0,90,0
+    location: -0.185,-1.575,-0.125
+    type: normal
+  Stick1:
+    small: 'true'
+    item: stick
+    angle: 0,0,0
+    location: -0.125,-1.575,0.185
+    type: normal
+  Fire:
+    small: 'false'
+    item: air
+    angle: 0,0,0
+    location: 0,-1.3,0
+    type: fire
+  Stick8:
+    small: 'true'
+    item: stick
+    angle: 0,-45,0
+    location: 0.05,-1.575,0.21
+    type: normal
 Stool:
   Leg2:
     small: 'false'
@@ -211,3 +266,4 @@ Models:
 - Log
 - Chair
 - Table
+- Campfire
