@@ -1,0 +1,213 @@
+Stool:
+  Leg2:
+    small: 'false'
+    item: stick
+    angle: 0,90,0
+    location: -0.25,-2.4,-0.1
+    type: normal
+  Leg3:
+    small: 'false'
+    item: stick
+    angle: 0,180,0
+    location: 0.1,-2.4,-0.25
+    type: normal
+  Leg4:
+    small: 'false'
+    item: stick
+    angle: 0,270,0
+    location: 0.25,-2.4,0.1
+    type: normal
+  Leg1:
+    small: 'false'
+    item: stick
+    angle: 0,0,0
+    location: -0.1,-2.4,0.25
+    type: normal
+  Plank:
+    small: 'false'
+    item: wood_plate
+    angle: 0,0,0
+    location: 0,-1.35,0
+    type: normal
+  Sit:
+    small: 'false'
+    item: air
+    angle: 0,0,0
+    location: 0,-1.65,0
+    type: sit
+Table:
+  Leg2:
+    small: 'false'
+    item: spruce_fence
+    angle: 0,-45,0
+    location: 0,-1.825,0
+    type: normal
+  Plank5:
+    small: 'false'
+    item: trap_door
+    angle: 0,0,0
+    location: 0.1,-0.8,0.1
+    type: normal
+  Plank4:
+    small: 'true'
+    item: wood_plate
+    angle: 0,0,0
+    location: -0.19140625,0,-0.19140625
+    type: normal
+  Plank3:
+    small: 'true'
+    item: wood_plate
+    angle: 0,0,0
+    location: -0.19140625,0,0.19140625
+    type: normal
+  Plank2:
+    small: 'true'
+    item: wood_plate
+    angle: 0,0,0
+    location: 0.19140625,0,-0.19140625
+    type: normal
+  Plank8:
+    small: 'false'
+    item: trap_door
+    angle: 0,0,0
+    location: -0.1,-0.8,-0.1
+    type: normal
+  Plank7:
+    small: 'false'
+    item: trap_door
+    angle: 0,0,0
+    location: -0.1,-0.8,0.1
+    type: normal
+  Leg1:
+    small: 'false'
+    item: spruce_fence
+    angle: 0,45,0
+    location: 0,-1.825,0
+    type: normal
+  Plank6:
+    small: 'false'
+    item: trap_door
+    angle: 0,0,0
+    location: 0.1,-0.8,0.1
+    type: normal
+  Plank1:
+    small: 'true'
+    item: wood_plate
+    angle: 0,0,0
+    location: 0.19140625,0,0.19140625
+    type: normal
+  Foot:
+    small: 'false'
+    item: wood_plate
+    angle: 0,0,0
+    location: 0,-1.86,0
+    type: normal
+Log:
+  Sit3:
+    small: 'false'
+    item: air
+    angle: 0,0,0
+    location: 0,-1.6,-1
+    type: sit
+  Sit2:
+    small: 'false'
+    item: air
+    angle: 0,0,0
+    location: 0,-1.6,0
+    type: sit
+  Sit1:
+    small: 'false'
+    item: air
+    angle: 0,0,0
+    location: 0,-1.6,1
+    type: sit
+  Log4:
+    small: 'false'
+    item: log
+    angle: 90,0,0
+    location: 0,-1.6,-0.875
+    type: normal
+  Log5:
+    small: 'false'
+    item: log
+    angle: 90,0,0
+    location: 0,-1.6,-1.5
+    type: normal
+  Log1:
+    small: 'false'
+    item: log
+    angle: 90,0,0
+    location: 0,-1.6,1
+    type: normal
+  Log2:
+    small: 'false'
+    item: log
+    angle: 90,0,0
+    location: 0,-1.6,0.375
+    type: normal
+  Log3:
+    small: 'false'
+    item: log
+    angle: 90,0,0
+    location: 0,-1.6,-0.25
+    type: normal
+Chair:
+  Leg2:
+    small: 'true'
+    item: stick
+    angle: 0,0,-45
+    location: 0.585,-1.35,-0.05
+    type: normal
+  Leg3:
+    small: 'true'
+    item: stick
+    angle: 0,0,-45
+    location: 0.125,-1.35,0.425
+    type: normal
+  Leg4:
+    small: 'true'
+    item: stick
+    angle: 0,0,-45
+    location: 0.585,-1.35,0.425
+    type: normal
+  Plank2:
+    small: 'false'
+    item: wood_plate
+    angle: 0,0,0
+    location: 0,-1.3,0
+    type: normal
+  Back2:
+    small: 'false'
+    item: spruce_fence_gate
+    angle: 0,0,0
+    location: 0,-0.93,0
+    type: normal
+  Back1:
+    small: 'false'
+    item: spruce_fence_gate
+    angle: 0,0,0
+    location: 0,-1.36,0
+    type: normal
+  Leg1:
+    small: 'true'
+    item: stick
+    angle: 0,0,-45
+    location: 0.125,-1.35,-0.05
+    type: normal
+  Plank1:
+    small: 'false'
+    item: trap_door
+    angle: 0,0,0
+    location: 0,-1.4,0
+    type: normal
+  Sit:
+    small: 'false'
+    item: air
+    angle: 0,0,0
+    location: 0,-1.6,0
+    type: sit
+Models:
+- Stool
+- Log
+- Chair
+- Table
