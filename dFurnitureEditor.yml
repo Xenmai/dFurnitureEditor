@@ -2,7 +2,7 @@ dFurnitureEditor_Version:
   type: version 
   author: Xenmai
   name: dFurnitureEditor 
-  version: 0.8
+  version: 0.8.1
   description: An advanced menu for editing and placing/removing furniture Models 
   id: 98
   
@@ -75,15 +75,17 @@ dFE_Command:
         - queue clear
       }
       
-      - if <context.args.get[3].is[==].to[-a]> {
-        - define part all
-      }
-      else if <context.args.get[3].matches[<&lb>a-zA-Z0-9_<&rb>+]> {
-        - define part <context.args.get[3]>
-      }
-      else {
-        - narrate "Invalid third argument specified. Please use -a or a part name."
-        - queue clear
+      - if <context.args.size.is[==].to[3]> {
+        - if <context.args.get[3].is[==].to[-a]> {
+          - define part all
+        }
+        else if <context.args.get[3].matches[<&lb>a-zA-Z0-9_<&rb>+]> {
+          - define part <context.args.get[3]>
+        }
+        else {
+          - narrate "Invalid third argument specified. Please use -a or a part name."
+          - queue clear
+        }
       }
       
       - run dFE_Task_Edit def:<def[model]>|<def[part]> instantly
@@ -125,18 +127,21 @@ dFE_Command:
     # Rotates a placed drop to a yaw.
     - case rotate:
       - if <context.args.size.is[!=].to[3]> {
-        - narrate "Invalid number of arguments specified. Proper usage is '/dfe rotate [-s/#] [#]'."
+        - narrate "Invalid number of arguments specified. Proper usage is '/dfe rotate [-s/-t/#] [#]'."
         - queue clear
       }
       
       - if <context.args.get[2].is[==].to[-s]> {
         - run dFE_Task_Rotate def:<player.flag[dFE_Selection]>|<context.args.get[3]> instantly
       }
+      else if <context.args.get[2].is[==].to[-t]> {
+        - run dFE_Task_Rotate def:<player.target.flag[dFE_ID]>|<context.args.get[3]> instantly
+      }
       else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> {
         - run dFE_Task_Rotate def:<context.args.get[2]>|<context.args.get[3]> instantly
       }
       else {
-        - narrate "Invalid second argument specified. Please use -s or an integer."
+        - narrate "Invalid second argument specified. Please use -s, -t or an integer."
       }
     
     # Places a prop at your current location.
@@ -710,7 +715,7 @@ dFE_World:
     # Listener for sitting components in placed Models.
     on player right clicks at entity:
       - determine passively cancelled
-      - define entity <context.entity.location.find.entities[armor_stand].within[2.0].filter[has_flag[dFE_Sit]].get[1]>
+      - define entity <context.entity.location.find.entities[armor_stand].within[1.2].filter[has_flag[dFE_Sit]].get[1]>
       - if <def[entity]||null> == null {
         - queue clear
       }
