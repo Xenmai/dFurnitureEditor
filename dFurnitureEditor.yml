@@ -2,7 +2,7 @@ dFurnitureEditor_Version:
   type: version 
   author: Xenmai
   name: dFurnitureEditor 
-  version: 0.8.1
+  version: 0.8.2
   description: An advanced menu for editing and placing/removing furniture Models 
   id: 98
   
@@ -45,28 +45,26 @@ dFE_Command:
     
     # Opens the general dFE editor GUI.
     - case edit:
-      - foreach li@CreateProp|DeleteProp|CreatePart|DeletePart|SetLocation|SetAngle|SetItem|SetType|Editing1|Editing2 {
-        - flag <player> <def[value]>:!
-      }
+      - flag <player> dFE:!
       
       - if <context.args.size.is[==].to[2]> || <context.args.size.is[==].to[3]> {
         - if <context.args.get[2].is[==].to[-a]> {
           - define model all
         }
         else if <context.args.get[2].is[==].to[-s]> {
-          - define model <yaml[Placed_Props].read[<player.flag[dFE_Selection]>.model]>
+          - define model <yaml[dFE_Placed_Props].read[<player.flag[dFE_Selection]>.model]>
         }
         else if <context.args.get[2].is[==].to[-t]> {
-          - define model <yaml[Placed_Props].read[<player.target.flag[dFE_ID]>.model]>
+          - define model <yaml[dFE_Placed_Props].read[<player.target.flag[dFE_ID]>.model]>
         }
-        else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> {
-          - define model <yaml[Placed_Props].read[<context.args.get[2]>.model]>
+        else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> && <context.args.get[2].is[MORE].to[0]> {
+          - define model <yaml[dFE_Placed_Props].read[<context.args.get[2]>.model]>
         }
         else if <context.args.get[2].matches[<&lb>a-zA-Z0-9_<&rb>+]> {
           - define model <context.args.get[2]>
         }
         else {
-          - narrate "Invalid second argument specified. Please use -a, -s, -t, an integer or a model name."
+          - narrate "Invalid second argument specified. Please use -a, -s, -t, a positive integer or a model name."
           - queue clear
         }
       }
@@ -100,11 +98,11 @@ dFE_Command:
       - if <context.args.get[2].is[==].to[-t]> {
         - run dFE_Task_Select def:<player.target.flag[dFE_ID]> instantly
       }
-      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> {
+      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> && <context.args.get[2].is[MORE].to[0]> {
         - run dFE_Task_Select def:<context.args.get[2]> instantly
       }
       else {
-        - narrate "Invalid second argument specified. Please use -t or an integer."
+        - narrate "Invalid second argument specified. Please use -t or a positive integer."
       }
     
     # Moves a placed prop to your position.
@@ -117,7 +115,7 @@ dFE_Command:
       - if <context.args.get[2].is[==].to[-s]> {
         - run dFE_Task_Move def:<player.flag[dFE_Selection]>|<player.location.block> instantly
       }
-      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> {
+      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> && <context.args.get[2].is[MORE].to[0]> {
         - run dFE_Task_Move def:<context.args.get[2]>|<player.location.block> instantly
       }
       else {
@@ -137,11 +135,11 @@ dFE_Command:
       else if <context.args.get[2].is[==].to[-t]> {
         - run dFE_Task_Rotate def:<player.target.flag[dFE_ID]>|<context.args.get[3]> instantly
       }
-      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> {
+      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> && <context.args.get[2].is[MORE].to[0]> {
         - run dFE_Task_Rotate def:<context.args.get[2]>|<context.args.get[3]> instantly
       }
       else {
-        - narrate "Invalid second argument specified. Please use -s, -t or an integer."
+        - narrate "Invalid second argument specified. Please use -s, -t or a positive integer."
       }
     
     # Places a prop at your current location.
@@ -176,11 +174,11 @@ dFE_Command:
       else if <context.args.get[2].is[==].to[-t]> {
         - run dFE_Task_Remove def:<player.target.flag[dFE_ID]> instantly
       }
-      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> {
+      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> && <context.args.get[2].is[MORE].to[0]> {
         - run dFE_Task_Remove def:<context.args.get[2]> instantly
       }
       else {
-        - narrate "Invalid second argument specified. Please use -s, -t or an integer."
+        - narrate "Invalid second argument specified. Please use -s, -t or a positive integer."
       }
     # Changes the placed prop with an old ID to a new one.
     - case changeid:
@@ -206,38 +204,38 @@ dFE_Task_Place:
   definitions: loc|yaw|model
   script:
   
-  - if <yaml[Models].read[Models].contains[<def[model]>].not> {
+  - if <yaml[dFE_Models].read[Models].contains[<def[model]>].not> {
     - narrate "Model with name <def[model]> doesn't exist. Make sure you're specifying the correct model."
     - queue clear
   }
   
-  #- light <def[loc].below> <def[loc].light>
+  - light <def[loc].below> <def[loc].light>
   - define id 1
-  - while <yaml[Placed_Props].list_keys[].contains[<def[id]>]> {
+  - while <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>]> {
     - define id <def[id].add[1]>
   }
   
-  - yaml id:Placed_Props set <def[id]>.location:<def[loc]>
-  - yaml id:Placed_Props set <def[id]>.yaw:<def[yaw]>
-  - yaml id:Placed_Props set <def[id]>.model:<def[model]>
+  - yaml id:dFE_Placed_Props set <def[id]>.location:<def[loc]>
+  - yaml id:dFE_Placed_Props set <def[id]>.yaw:<def[yaw]>
+  - yaml id:dFE_Placed_Props set <def[id]>.model:<def[model]>
       
-  - foreach <yaml[Models].list_keys[<def[model]>]> {
-    - define location l@<yaml[Models].read[<def[model]>.<def[value]>.location]>
-    - define angle <yaml[Models].read[<def[model]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]>
-    - define small <yaml[Models].read[<def[model]>.<def[value]>.small]>
-    - define item <yaml[Models].read[<def[model]>.<def[value]>.item]>
-    - define type <yaml[Models].read[<def[model]>.<def[value]>.type]>
+  - foreach <yaml[dFE_Models].list_keys[<def[model]>]> {
+    - define location l@<yaml[dFE_Models].read[<def[model]>.<def[value]>.location]>
+    - define angle <yaml[dFE_Models].read[<def[model]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]>
+    - define small <yaml[dFE_Models].read[<def[model]>.<def[value]>.small]>
+    - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]>
+    - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
     
-    - spawn armor_stand[max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[Models].read[<def[model]>]>
+    - spawn armor_stand[max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[dFE_Models].read[<def[model]>]>
     
     - if <def[type].is[==].to[sit]> {
-      - flag <entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Sit
+      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Sit
     }
     else if <def[type].is[==].to[fire]> {
-      - flag <entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Fire
+      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Fire
     }
-    - flag <entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_ID:<def[id]>
-    - yaml id:Placed_Props set <def[id]>.entities:->:<entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]>
+    - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_ID:<def[id]>
+    - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]>
   }
   - narrate "Placed <def[model]> at location <def[loc].simple> with ID <def[id]>."
 
@@ -252,15 +250,15 @@ dFE_Task_Remove:
     - narrate "Invalid ID specified. Please use an integer."
     - queue clear
   }
-  - if <yaml[Placed_Props].list_keys[].contains[<def[id]>].not> {
+  - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>].not> {
     - narrate "Placed prop with ID <def[id]> doesn't exist. Make sure you're specifying the correct ID."
     - queue clear
   }
   
-  #- light <def[loc].below> reset
-  - remove <yaml[Placed_Props].read[<def[id]>.entities]>
-  - narrate "Removed <yaml[Placed_Props].read[<def[id]>.model]> at location <yaml[Placed_Props].read[<def[id]>.location].as_location.simple> with ID <def[id]>."
-  - yaml id:Placed_Props set <def[id]>:!
+  - light <def[loc].below> reset
+  - remove <yaml[dFE_Placed_Props].read[<def[id]>.entities]>
+  - narrate "Removed <yaml[dFE_Placed_Props].read[<def[id]>.model]> at location <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.simple> with ID <def[id]>."
+  - yaml id:dFE_Placed_Props set <def[id]>:!
     
 # Selects certain placed prop.
 dFE_Task_Select:
@@ -275,7 +273,7 @@ dFE_Task_Select:
   }
   
   - flag <player> dFE_Selection:<def[id]>
-  - narrate "Selected <yaml[Placed_Props].read[<def[id]>.model]> with ID <def[id]>."
+  - narrate "Selected <yaml[dFE_Placed_Props].read[<def[id]>.model]> with ID <def[id]>."
 
 # Moves certain placed prop to a location.
 dFE_Task_Move:
@@ -288,7 +286,7 @@ dFE_Task_Move:
     - narrate "Invalid ID specified. Please use an integer."
     - queue clear
   }
-  - if <yaml[Placed_Props].list_keys[].contains[<def[id]>].not> {
+  - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>].not> {
     - narrate "Placed prop with ID <def[id]> doesn't exist. Make sure you're specifying the correct ID."
     - queue clear
   }
@@ -297,11 +295,11 @@ dFE_Task_Move:
     - queue clear
   }
   
-  - foreach <yaml[Placed_Props].read[<def[id]>.entities]> {
-    - teleport <def[value]> <def[value].location.add[<def[loc]>].sub[<yaml[Placed_Props].read[<def[id]>.location].as_location>].with_pose[0,<def[value].location.yaw>]>
+  - foreach <yaml[dFE_Placed_Props].read[<def[id]>.entities]> {
+    - teleport <def[value]> <def[value].location.add[<def[loc]>].sub[<yaml[dFE_Placed_Props].read[<def[id]>.location].as_location>].with_pose[0,<def[value].location.yaw>]>
   }
-  - yaml id:Placed_Props set <def[id]>.location:<def[loc]>
-  - narrate "Moved <yaml[Placed_Props].read[<def[id]>.model]> with ID <def[id]> to location <def[loc].simple>."
+  - yaml id:dFE_Placed_Props set <def[id]>.location:<def[loc]>
+  - narrate "Moved <yaml[dFE_Placed_Props].read[<def[id]>.model]> with ID <def[id]> to location <def[loc].simple>."
     
 # Rotates a placed drop to match a yaw.
 dFE_Task_Rotate:
@@ -314,7 +312,7 @@ dFE_Task_Rotate:
     - narrate "Invalid ID specified. Please use an integer."
     - queue clear
   }
-  - if <yaml[Placed_Props].list_keys[].contains[<def[id]>].not> {
+  - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>].not> {
     - narrate "Placed prop with ID <def[id]> doesn't exist. Make sure you're specifying the correct ID."
     - queue clear
   }
@@ -323,11 +321,11 @@ dFE_Task_Rotate:
     - queue clear
   }
       
-  - foreach <yaml[Placed_Props].read[<def[id]>.entities]> {
-    - teleport <def[value]> <yaml[Placed_Props].read[<def[id]>.location].as_location.center.add[<def[value].location.sub[<yaml[Placed_Props].read[<def[id]>.location].as_location.center>].rotate_around_y[<def[yaw].sub[<yaml[Placed_Props].read[<def[id]>.yaw]>].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]>
+  - foreach <yaml[dFE_Placed_Props].read[<def[id]>.entities]> {
+    - teleport <def[value]> <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.center.add[<def[value].location.sub[<yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.center>].rotate_around_y[<def[yaw].sub[<yaml[dFE_Placed_Props].read[<def[id]>.yaw]>].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]>
   }
-  - yaml id:Placed_Props set <def[id]>.yaw:<def[yaw]>
-  - narrate "Rotated <yaml[Placed_Props].read[<def[id]>.model]> with ID <def[id]> to yaw <def[yaw]>."
+  - yaml id:dFE_Placed_Props set <def[id]>.yaw:<def[yaw]>
+  - narrate "Rotated <yaml[dFE_Placed_Props].read[<def[id]>.model]> with ID <def[id]> to yaw <def[yaw]>."
     
 # Opens the Editor Menu for certain model and part.
 dFE_Task_Edit:
@@ -342,23 +340,23 @@ dFE_Task_Edit:
     - queue clear
   }
   
-  - if <yaml[Models].read[Models].contains[<def[model]>].not> {
+  - if <yaml[dFE_Models].read[Models].contains[<def[model]>].not> {
     - narrate "Model with name <def[model]> doesn't exist. Make sure you're specifying the correct model."
     - queue clear
   }
   - if <def[part]> == all {
-    - flag <player> Editing1:<def[model]>
+    - flag <player> dFE.Editing1:<def[model]>
     - narrate "Editing model <def[model]>."
     - inventory open d:in@Model_Menu
     - queue clear
   }
   
-  - if <yaml[Models].list_keys[<def[model]>].contains[<def[part]>].not> {
+  - if <yaml[dFE_Models].list_keys[<def[model]>].contains[<def[part]>].not> {
     - narrate "Part with name <def[part]> doesn't exist. Make sure you're specifying the correct part."
     - queue clear
   }
-  - flag <player> Editing1:<def[model]>
-  - flag <player> Editing2:<def[part]>
+  - flag <player> dFE.Editing1:<def[model]>
+  - flag <player> dFE.Editing2:<def[part]>
   - narrate "Editing <def[part]> from model <def[model]>."
   - inventory open d:in@Part_Menu
     
@@ -370,26 +368,30 @@ dFE_Task_ChangeId:
   script:
   
   - if <def[old].is[==].to[<def[old].as_int>].not> || <def[new].is[==].to[<def[new].as_int>].not> {
-    - narrate "Invalid IDs specified. Please use two integers."
+    - narrate "Invalid IDs specified. Please use two positive integers."
+    - queue clear
+  }
+  - if <def[old].is[LESS].to[1]> || <def[new].is[LESS].to[1]> {
+    - narrate "Invalid IDs specified. Please use two positive integers."
     - queue clear
   }
   - if <def[new]> >= <def[old]> {
     - narrate "The new id must be lower than the old one."
     - queue clear
   }
-  - if <yaml[Placed_Props].list_keys[].contains[<def[old]>].not> {
+  - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[old]>].not> {
     - narrate "Placed prop with ID <def[old]> doesn't exist. Make sure you're specifying the correct ID."
     - queue clear
   }
-  - if <yaml[Placed_Props].list_keys[].contains[<def[new]>]> {
+  - if <yaml[dFE_Placed_Props].list_keys[].contains[<def[new]>]> {
     - narrate "Placed prop with ID <def[new]> already exists. Make sure you're specifying an unused ID."
     - queue clear
   }
   
-  - foreach <yaml[Placed_Props].list_keys[<def[old]>]> {
-    - yaml id:Placed_Props set <def[new]>.<def[value]>:<yaml[Placed_Props].read[<def[old]>.<def[value]>]>
+  - foreach <yaml[dFE_Placed_Props].list_keys[<def[old]>]> {
+    - yaml id:dFE_Placed_Props set <def[new]>.<def[value]>:<yaml[dFE_Placed_Props].read[<def[old]>.<def[value]>]>
   }
-  - yaml id:Placed_Props set <def[old]>:!
+  - yaml id:dFE_Placed_Props set <def[old]>:!
   - narrate "Changed placed prop with old ID <def[old]> to new ID <def[new]>"
     
 # Updates placed models to match their latest values.
@@ -399,39 +401,37 @@ dFE_Task_Update:
   definitions: model
   script:
   
-  - foreach <yaml[Placed_Props].list_keys[]> {
-    - if <yaml[Placed_Props].read[<def[value]>.model].is[==].to[<def[model]>]> {
-      - define loc <yaml[Placed_Props].read[<def[value]>.location]>
-      - define model <yaml[Placed_Props].read[<def[value]>.model]>
-      - define yaw <yaml[Placed_Props].read[<def[value]>.yaw]>
+  - foreach <yaml[dFE_Placed_Props].list_keys[]> {
+    - if <yaml[dFE_Placed_Props].read[<def[value]>.model].is[==].to[<def[model]>]> {
+      - define loc <yaml[dFE_Placed_Props].read[<def[value]>.location]>
+      - define model <yaml[dFE_Placed_Props].read[<def[value]>.model]>
+      - define yaw <yaml[dFE_Placed_Props].read[<def[value]>.yaw]>
       - define id <def[value]>
       
-      #- light <def[loc].below> reset
-      - remove <yaml[Placed_Props].read[<def[id]>.entities]>
-      - yaml id:Placed_Props set <def[id]>:!
+      - remove <yaml[dFE_Placed_Props].read[<def[id]>.entities]>
+      - yaml id:dFE_Placed_Props set <def[id]>:!
   
-      #- light <def[loc].below> <def[loc].light>
-      - yaml id:Placed_Props set <def[id]>.location:<def[loc]>
-      - yaml id:Placed_Props set <def[id]>.model:<def[model]>
-      - yaml id:Placed_Props set <def[id]>.yaw:<def[yaw]>    
+      - yaml id:dFE_Placed_Props set <def[id]>.location:<def[loc]>
+      - yaml id:dFE_Placed_Props set <def[id]>.model:<def[model]>
+      - yaml id:dFE_Placed_Props set <def[id]>.yaw:<def[yaw]>    
       
-      - foreach <yaml[Models].list_keys[<def[model]>]> {
-        - define location l@<yaml[Models].read[<def[model]>.<def[value]>.location]>
-        - define angle <yaml[Models].read[<def[model]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]>
-        - define small <yaml[Models].read[<def[model]>.<def[value]>.small]>
-        - define item <yaml[Models].read[<def[model]>.<def[value]>.item]>
-        - define type <yaml[Models].read[<def[model]>.<def[value]>.type]>
+      - foreach <yaml[dFE_Models].list_keys[<def[model]>]> {
+        - define location l@<yaml[dFE_Models].read[<def[model]>.<def[value]>.location]>
+        - define angle <yaml[dFE_Models].read[<def[model]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]>
+        - define small <yaml[dFE_Models].read[<def[model]>.<def[value]>.small]>
+        - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]>
+        - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
         
-        - spawn armor_stand[max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[Models].read[<def[model]>]>
+        - spawn armor_stand[max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[dFE_Models].read[<def[model]>]>
         
         - if <def[type].is[==].to[sit]> {
-          - flag <entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Sit
+          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Sit
         }
         else if <def[type].is[==].to[fire]> {
-          - flag <entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Fire
+          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Fire
         }
-        - flag <entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_ID:<def[id]>
-        - yaml id:Placed_Props set <def[id]>.entities:->:<entry[<yaml[Models].read[<def[model]>]>].spawned_entities.after[li@]>
+        - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_ID:<def[id]>
+        - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]>
       }
     }
   }
@@ -448,19 +448,19 @@ dFE_Task_Update:
 #                                                   |_|                  
 dFE_World: 
   type: world
-  debug: false
+  debug: true
   events:
     
     # Loads the files, or creates them if it doesn't exist yet.
     on server start:
     
       - foreach li@Models|Placed_Props {
-        - if <server.has_file[/dFurnitureEditor/<def[value]>.yml]> {
-          - yaml "load:/dFurnitureEditor/<def[value]>.yml" id:<def[value]>
+        - if <server.has_file[/dFurnitureEditor/dFE_<def[value]>.yml]> {
+          - yaml "load:/dFurnitureEditor/dFE_<def[value]>.yml" id:dFE_<def[value]>
         }
         else {
           - yaml create id:<def[value]>       
-          - yaml "savefile:/dFurnitureEditor/<def[value]>.yml" id:<def[value]>
+          - yaml "savefile:/dFurnitureEditor/dFE_<def[value]>.yml" id:dFE_<def[value]>
         }
       }
     
@@ -468,14 +468,9 @@ dFE_World:
     on shutdown:
     
       - foreach li@Models|Placed_Props {
-        - yaml "savefile:/dFurnitureEditor/<def[value]>.yml" id:<def[value]>
+        - yaml "savefile:/dFurnitureEditor/dFE_<def[value]>.yml" id:dFE_<def[value]>
         - yaml unload id::<def[value]>
       }
-    
-    # Places a created prop.
-    on place command:
-    
-      - determine passively fulfilled
       
     # Listener for the Editor Menu. Prevents clicking items.
     on player clicks in Editor_Menu:
@@ -488,17 +483,17 @@ dFE_World:
         - case 3:
           - inventory close
           - narrate "Enter name for the new prop."
-          - flag player CreateProp
+          - flag player dFE.CreateProp
         
         - case 4:
           - inventory close
           - narrate "Enter name of the prop to delete."
-          - flag player DeleteProp
+          - flag player dFE.DeleteProp
         
         - default:
           - if <context.item.material> == m@workbench {
             - inventory close
-            - flag player Editing1:<context.item.display.strip_color>
+            - flag player dFE.Editing1:<context.item.display.strip_color>
             - inventory open d:in@Model_Menu
           }
     
@@ -520,17 +515,17 @@ dFE_World:
         - case 3:
           - inventory close
           - narrate "Enter name for the new part."
-          - flag player CreatePart
+          - flag player dFE.CreatePart
         
         - case 4:
           - inventory close
           - narrate "Enter name of the part to delete."
-          - flag player DeletePart
+          - flag player dFE.DeletePart
         
         - default:
           - if <context.item.material> == m@armor_stand {
             - inventory close
-            - flag player Editing2:<context.item.display.strip_color>
+            - flag player dFE.Editing2:<context.item.display.strip_color>
             - inventory open d:in@Part_Menu
           }
     
@@ -548,33 +543,33 @@ dFE_World:
         - case 3:
           - inventory close
           - narrate "Enter location offset value as x,y,z."
-          - flag player SetLocation
+          - flag player dFE.SetLocation
         
         - case 4:
           - inventory close
           - narrate "Enter head angle values as a,b,c."
-          - flag player SetAngle 
+          - flag player dFE.SetAngle 
         
         - case 5:
           - inventory close
           - narrate "Small state toggled."
-          - if <yaml[Models].read[<player.flag[Editing1]>.<player.flag[Editing2]>.small]> == true {
-            - yaml id:Models set <player.flag[Editing1]>.<player.flag[Editing2]>.small:false
+          - if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small]> == true {
+            - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small:false
           }
           else {
-            - yaml id:Models set <player.flag[Editing1]>.<player.flag[Editing2]>.small:true
+            - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small:true
           }
           - inventory open d:in@Part_Menu
         
         - case 6:
           - inventory close
           - narrate "Enter name of item to equip."
-          - flag player SetItem
+          - flag player dFE.SetItem
         
         - case 7:
           - inventory close
           - narrate "Enter type of the element (normal, sit and fire allowed)."
-          - flag player SetType
+          - flag player dFE.SetType
         
         - case 1:
           - inventory close
@@ -589,126 +584,126 @@ dFE_World:
     on player chats:
       
       # Enter name for the new prop.
-      - if <player.has_flag[CreateProp]> {
+      - if <player.has_flag[dFE.CreateProp]> {
         - determine passively cancelled
         # Checks for input to be alphanumerical & _.
         - if <context.message.matches[<&lb>a-zA-Z0-9_<&rb>+].not> {
           - narrate "Prop names must be alphanumerical & _, please try again with a valid name."
           - queue clear
         }
-        - if <yaml[Models].read[Models].contains[<context.message>]> {
+        - if <yaml[dFE_Models].read[Models].contains[<context.message>]> {
           - narrate "Prop name <context.message> already in use!"
         }
         else {
-          - yaml id:Models set Models:->:<context.message>
+          - yaml id:dFE_Models set Models:->:<context.message>
           - narrate "Prop <context.message> created!"
         }
-        - flag player CreateProp:!
+        - flag player dFE.CreateProp:!
         - inventory open d:in@Editor_Menu
       }
       
       # Enter name of prop to delete.
-      else if <player.has_flag[DeleteProp]> {
+      else if <player.has_flag[dFE.DeleteProp]> {
         - determine passively cancelled
-        - if <yaml[Models].read[Models].contains[<context.message>]> {
-          - yaml id:Models set Models:<-:<context.message>
-          - yaml id:Models set <context.message>:!
+        - if <yaml[dFE_Models].read[Models].contains[<context.message>]> {
+          - yaml id:dFE_Models set Models:<-:<context.message>
+          - yaml id:dFE_Models set <context.message>:!
           - narrate "Prop <context.message> deleted!"
         }
         else {
           - narrate "Prop <context.message> doesn't exist!"
         }
-        - flag player DeleteProp:!
+        - flag player dFE.DeleteProp:!
         - inventory open d:in@Editor_Menu
       }
       
       # Enter name for the new part.
-      else if <player.has_flag[CreatePart]> {
+      else if <player.has_flag[dFE.CreatePart]> {
         - determine passively cancelled
         # Checks for input to be alphanumerical & _.
         - if <context.message.matches[<&lb>a-zA-Z0-9_<&rb>+].not> {
           - narrate "Part names must be alphanumerical & _, please try again with a valid name."
           - queue clear
         }
-        - if <yaml[Models].list_keys[<player.flag[Editing1]>].contains[<context.message>]> {
+        - if <yaml[dFE_Models].list_keys[<player.flag[dFE.Editing1]>].contains[<context.message>]> {
           - narrate "Part name already in use!"
         }
         else {
-          - yaml id:Models set <player.flag[Editing1]>.<context.message>.location:0,0,0
-          - yaml id:Models set <player.flag[Editing1]>.<context.message>.angle:0,0,0
-          - yaml id:Models set <player.flag[Editing1]>.<context.message>.small:false
-          - yaml id:Models set <player.flag[Editing1]>.<context.message>.item:stone
-          - yaml id:Models set <player.flag[Editing1]>.<context.message>.type:normal
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.location:0,0,0
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.angle:0,0,0
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.small:false
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.item:stone
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.type:normal
           - narrate "Part <context.message> created!"
         }
-        - flag player CreatePart:!
+        - flag player dFE.CreatePart:!
         - inventory open d:in@Model_Menu
       }
       
       # Enter name of part to delete.
-      else if <player.has_flag[DeletePart]> {
+      else if <player.has_flag[dFE.DeletePart]> {
         - determine passively cancelled
-        - if <yaml[Models].list_keys[<player.flag[Editing1]>].contains[<context.message>]> {
-          - yaml id:Models set <player.flag[Editing1]>.<context.message>:!
+        - if <yaml[dFE_Models].list_keys[<player.flag[dFE.Editing1]>].contains[<context.message>]> {
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>:!
           - narrate "Part <context.message> deleted!"
-          - run dFE_Task_Update def:<player.flag[Editing1]> instantly
+          - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
         }
         else {
           - narrate "Part <context.message> doesn't exist!"
         }
-        - flag player DeletePart:!
+        - flag player dFE.DeletePart:!
         - inventory open d:in@Model_Menu
       }
       
       # Enter location offset value as x,y,z.
-      else if <player.has_flag[SetLocation]> {
+      else if <player.has_flag[dFE.SetLocation]> {
         - determine passively cancelled
-        - yaml id:Models set <player.flag[Editing1]>.<player.flag[Editing2]>.location:<context.message>
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.location:<context.message>
         - narrate "Location offset set to <context.message>!"
-        - run dFE_Task_Update def:<player.flag[Editing1]> instantly
-        - flag player SetLocation:!
+        - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
+        - flag player dFE.SetLocation:!
         - inventory open d:in@Part_Menu
       }
       
       # Enter head angle values as a,b,c.
-      else if <player.has_flag[SetAngle]> {
+      else if <player.has_flag[dFE.SetAngle]> {
         - determine passively cancelled
-        - yaml id:Models set <player.flag[Editing1]>.<player.flag[Editing2]>.angle:<context.message>
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.angle:<context.message>
         - narrate "Rotation angle set to <context.message>!"
-        - run dFE_Task_Update def:<player.flag[Editing1]> instantly
-        - flag player SetAngle:!
+        - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
+        - flag player dFE.SetAngle:!
         - inventory open d:in@Part_Menu
       }
       
       # Enter item name to equip.
-      else if <player.has_flag[SetItem]> {
+      else if <player.has_flag[dFE.SetItem]> {
         - determine passively cancelled
-        - if <li@sit|fire.contains[<yaml[Models].read[<player.flag[Editing1]>.<player.flag[Editing2]>.type]>]> {
+        - if <li@sit|fire.contains[<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]> {
           - narrate "You can't give an item to a this type of element! Please change the element type to normal first."
           - queue clear
         }
-        - yaml id:Models set <player.flag[Editing1]>.<player.flag[Editing2]>.item:<context.message>
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:<context.message>
         - narrate "Item name set to <context.message>!"
-        - run dFE_Task_Update def:<player.flag[Editing1]> instantly
-        - flag player SetItem:!
+        - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
+        - flag player dFE.SetItem:!
         - inventory open d:in@Part_Menu
       }
       
       # Enter element type.
-      else if <player.has_flag[SetType]> {
+      else if <player.has_flag[dFE.SetType]> {
         - determine passively cancelled
         - if <li@normal|sit|fire.contains[<context.message>].not> {
           - narrate "Invalid element type! Valid types are normal, sit and fire."
           - queue clear
         }
         - if <li@sit|fire.contains[<context.message>]> {
-          - yaml id:Models set <player.flag[Editing1]>.<player.flag[Editing2]>.item:air
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air
           - narrate "Element item set to air!"
         }
-        - yaml id:Models set <player.flag[Editing1]>.<player.flag[Editing2]>.type:<context.message>
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type:<context.message>
         - narrate "Element type set to <context.message>!"
-        - run dFE_Task_Update def:<player.flag[Editing1]> instantly
-        - flag player SetType:!
+        - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
+        - flag player dFE.SetType:!
         - inventory open d:in@Part_Menu
       }
     
@@ -742,9 +737,11 @@ dFE_World:
     
     # BC's data tracker.
     on system time hourly:
-      - webget "http://stats.denizenscript.com/tracker?script=98&players=<server.list_online_players.size>"
-      - yaml "savefile:/dFurnitureEditor/Models.yml" id:Models
-      - yaml "savefile:/dFurnitureEditor/Placed_Props.yml" id:Placed_Props
+      - webget "http://stats.denizenscript.com/tracker?script=98&players=<server.list_online_players.size>&script_version=0.8.2&models=<yaml[dFE_Models].read[Models].size>&placed_props=<yaml[dFE_Placed_Props].list_keys[].size>&tps=<server.recent_tps>"
+      
+      - foreach li@Models|Placed_Props {
+        - yaml "savefile:/dFurnitureEditor/dFE_<def[value]>.yml" id:dFE_<def[value]>
+      }
 
 #  _____                      _                      _____           _       _        
 # |_   _|                    | |                    / ____|         (_)     | |       
@@ -769,8 +766,8 @@ Editor_Menu:
   - "[] [] [] [] [] [] [] [] []"
   procedural items: 
   - define items "li@i@blue_wool[display_name=<&b>Create a new prop]|i@red_wool[display_name=<&b>Delete a prop]"
-  - foreach <yaml[Models].read[Models].as_list.alphanumeric> {
-    - define items "<def[items].include[i@workbench[display_name=<&b><def[value]>;lore=<&d>Parts:|<yaml[Models].list_keys[<def[value]>].as_list.alphanumeric.after[li@]||None>]]>" 
+  - foreach <yaml[dFE_Models].read[Models].as_list.alphanumeric> {
+    - define items "<def[items].include[i@workbench[display_name=<&b><def[value]>;lore=<&d>Parts:|<yaml[dFE_Models].list_keys[<def[value]>].as_list.alphanumeric.after[li@]||None>]]>" 
   }
   - determine <def[items]>
 
@@ -789,9 +786,9 @@ Model_Menu:
   - "[] [] [] [] [] [] [] [] []"
   procedural items: 
   - define items "li@i@blue_wool[display_name=<&b>Create a new part]|i@red_wool[display_name=<&b>Delete a part]"
-  - if <yaml[Models].list_keys[<player.flag[Editing1]>].as_list.alphanumeric||null> != null {
-    - foreach <yaml[Models].list_keys[<player.flag[Editing1]>].as_list.alphanumeric> {
-      - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Location: <&5><&o><yaml[Models].read[<player.flag[Editing1]>.<def[value]>.location]>|<&d>Angle: <&5><&o><yaml[Models].read[<player.flag[Editing1]>.<def[value]>.angle]>|<&d>Small: <&5><&o><yaml[Models].read[<player.flag[Editing1]>.<def[value]>.small]>|<&d>Item: <&5><&o><yaml[Models].read[<player.flag[Editing1]>.<def[value]>.item]>|<&d>Type: <&5><&o><yaml[Models].read[<player.flag[Editing1]>.<def[value]>.type]>]]>" 
+  - if <yaml[dFE_Models].list_keys[<player.flag[dFE.Editing1]>].as_list.alphanumeric||null> != null {
+    - foreach <yaml[dFE_Models].list_keys[<player.flag[dFE.Editing1]>].as_list.alphanumeric> {
+      - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Location: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.location]>|<&d>Angle: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.angle]>|<&d>Small: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.small]>|<&d>Item: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.item]>|<&d>Type: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]>]]>" 
     }
   }
   - determine <def[items]>
@@ -805,5 +802,5 @@ Part_Menu:
   slots:
   - "[i@green_wool[display_name=<&b>Return]] [i@air] [] [] [] [] [] [] []"
   procedural items: 
-  - define items "li@i@paper[display_name=<&b>Location;lore=li@<yaml[Models].read[<player.flag[Editing1]>.<player.flag[Editing2]>.location]>]|i@paper[display_name=<&b>Angle;lore=li@<yaml[Models].read[<player.flag[Editing1]>.<player.flag[Editing2]>.angle]>]|i@paper[display_name=<&b>Small;lore=li@<yaml[Models].read[<player.flag[Editing1]>.<player.flag[Editing2]>.small]>]|i@paper[display_name=<&b>Item;lore=li@<yaml[Models].read[<player.flag[Editing1]>.<player.flag[Editing2]>.item]>]|i@paper[display_name=<&b>Type;lore=li@<yaml[Models].read[<player.flag[Editing1]>.<player.flag[Editing2]>.type]>]"
+  - define items "li@i@paper[display_name=<&b>Location;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.location]>]|i@paper[display_name=<&b>Angle;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.angle]>]|i@paper[display_name=<&b>Small;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small]>]|i@paper[display_name=<&b>Item;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item]>]|i@paper[display_name=<&b>Type;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]"
   - determine <def[items]>
