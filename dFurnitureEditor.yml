@@ -2,7 +2,7 @@ dFurnitureEditor_Version:
   type: version 
   author: Xenmai
   name: dFurnitureEditor 
-  version: 0.8.3
+  version: 0.9
   description: An advanced menu for editing and placing/removing furniture Models 
   id: 98
   
@@ -47,11 +47,17 @@ dFE_Command:
     - case edit:
       - flag <player> dFE:!
       
-      - if <context.args.size.is[==].to[2]> || <context.args.size.is[==].to[3]> {
+      - if <context.args.size.is[==].to[2]> {
         - if <context.args.get[2].is[==].to[-a]> {
           - define model all
         }
-        else if <context.args.get[2].is[==].to[-s]> {
+        else {
+          - narrate "Invalid second argument specified. Please use -a, -s, -t, a positive integer or a model name."
+          - queue clear
+        }
+      }
+      else if <context.args.size.is[==].to[3]> {
+        - if <context.args.get[2].is[==].to[-s]> {
           - define model <yaml[dFE_Placed_Props].read[<player.flag[dFE_Selection]>.model]>
         }
         else if <context.args.get[2].is[==].to[-t]> {
@@ -67,13 +73,6 @@ dFE_Command:
           - narrate "Invalid second argument specified. Please use -a, -s, -t, a positive integer or a model name."
           - queue clear
         }
-      }
-      else {
-        - narrate "Invalid number of arguments specified. Proper usage is '/dfe edit [-a/-s/-t/#/<&lt>model<&gt>] [-a/<&lt>part<&gt>]'."
-        - queue clear
-      }
-      
-      - if <context.args.size.is[==].to[3]> {
         - if <context.args.get[3].is[==].to[-a]> {
           - define part all
         }
@@ -85,8 +84,12 @@ dFE_Command:
           - queue clear
         }
       }
+      else {
+        - narrate "Invalid number of arguments specified. Proper usage is '/dfe edit [-a/-s/-t/#/<&lt>model<&gt>] [-a/<&lt>part<&gt>]'."
+        - queue clear
+      }
       
-      - run dFE_Task_Edit def:<def[model]>|<def[part]> instantly
+      - run dFE_Task_Edit def:<def[model]>|<def[part]||null> instantly
     
     # Selects a placed prop for later ease of moving or removing.
     - case select:
@@ -210,6 +213,7 @@ dFE_Task_Place:
   }
   
   - light <def[loc].below> <def[loc].light>
+  - light <def[loc].below.below> <def[loc].light>
   - define id 1
   - while <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>]> {
     - define id <def[id].add[1]>
@@ -226,10 +230,11 @@ dFE_Task_Place:
     - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]>
     - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
     
-    - spawn armor_stand[max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[dFE_Models].read[<def[model]>]>
+    - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[dFE_Models].read[<def[model]>]>
     
     - if <def[type].is[==].to[sit]> {
       - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Sit
+      - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
     }
     else if <def[type].is[==].to[fire]> {
       - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Fire
@@ -255,7 +260,8 @@ dFE_Task_Remove:
     - queue clear
   }
   
-  - light <def[loc].below> reset
+  - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below> reset
+  - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below.below> reset
   - remove <yaml[dFE_Placed_Props].read[<def[id]>.entities]>
   - narrate "Removed <yaml[dFE_Placed_Props].read[<def[id]>.model]> at location <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.simple> with ID <def[id]>."
   - yaml id:dFE_Placed_Props set <def[id]>:!
@@ -282,7 +288,7 @@ dFE_Task_Select:
 # Moves certain placed prop to a location.
 dFE_Task_Move:
   type: task
-  debug: false
+  debug: true
   definitions: id|loc
   script:
     
@@ -299,9 +305,13 @@ dFE_Task_Move:
     - queue clear
   }
   
+  - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below> reset
+  - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below.below> reset
   - foreach <yaml[dFE_Placed_Props].read[<def[id]>.entities]> {
     - teleport <def[value]> <def[value].location.add[<def[loc]>].sub[<yaml[dFE_Placed_Props].read[<def[id]>.location].as_location>].with_pose[0,<def[value].location.yaw>]>
   }
+  - light <def[loc].below> <def[loc].light>
+  - light <def[loc].below.below> <def[loc].light>
   - yaml id:dFE_Placed_Props set <def[id]>.location:<def[loc]>
   - narrate "Moved <yaml[dFE_Placed_Props].read[<def[id]>.model]> with ID <def[id]> to location <def[loc].simple>."
     
@@ -426,10 +436,11 @@ dFE_Task_Update:
         - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]>
         - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
         
-        - spawn armor_stand[max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[dFE_Models].read[<def[model]>]>
+        - spawn armor_stand[marker=false;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[dFE_Models].read[<def[model]>]>
         
         - if <def[type].is[==].to[sit]> {
           - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Sit
+          - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
         }
         else if <def[type].is[==].to[fire]> {
           - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE_Fire
