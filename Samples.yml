@@ -5,35 +5,11 @@ Barrel:
     angle: 0,0,0
     location: 0,-1.1,0
     type: normal
-  Bottom2:
-    small: 'true'
-    item: wood_plate
-    angle: 90,90,0
-    location: 0.15,-1,0
-    type: normal
-  Bottom1:
-    small: 'true'
-    item: wood_plate
-    angle: 90,0,0
-    location: 0,-1,-0.15
-    type: normal
-  Bottom4:
-    small: 'true'
-    item: wood_plate
-    angle: 90,-90,0
-    location: -0.15,-1,0
-    type: normal
   Plank1:
     small: 'false'
     item: wood_plate
     angle: 0,0,0
     location: 0,-1.6125,0
-    type: normal
-  Bottom3:
-    small: 'true'
-    item: wood_plate
-    angle: 90,180,0
-    location: 0,-1,0.15
     type: normal
   Plank2:
     small: 'false'
@@ -44,14 +20,14 @@ Barrel:
   Medium4:
     small: 'false'
     item: wood_plate
-    angle: 90,-90,0
-    location: -0.215,-1.4,0
+    angle: -90,0,90
+    location: 0,-1.4,0.215
     type: normal
   Medium3:
     small: 'false'
     item: wood_plate
-    angle: 90,180,0
-    location: 0,-1.4,0.215
+    angle: 180,0,90
+    location: 0.215,-1.4,0
     type: normal
   Ring1:
     small: 'true'
@@ -59,11 +35,17 @@ Barrel:
     angle: 0,0,0
     location: 0,-1.075,0
     type: normal
+  Bottom3:
+    small: 'true'
+    item: wood_plate
+    angle: 180,0,90
+    location: 0.15,-1,0
+    type: normal
   Medium2:
     small: 'false'
     item: wood_plate
-    angle: 90,90,0
-    location: 0.215,-1.4,0
+    angle: 90,0,90
+    location: 0,-1.4,-0.215
     type: normal
   Ring2:
     small: 'false'
@@ -71,11 +53,17 @@ Barrel:
     angle: 0,0,0
     location: 0,-1.4,0
     type: normal
+  Bottom4:
+    small: 'true'
+    item: wood_plate
+    angle: -90,0,90
+    location: 0,-1,0.15
+    type: normal
   Medium1:
     small: 'false'
     item: wood_plate
-    angle: 90,0,0
-    location: 0,-1.4,-0.215
+    angle: 0,0,90
+    location: -0.215,-1.4,0
     type: normal
   Ring3:
     small: 'true'
@@ -83,29 +71,41 @@ Barrel:
     angle: 0,0,0
     location: 0,-0.3,0
     type: normal
+  Bottom1:
+    small: 'true'
+    item: wood_plate
+    angle: 0,0,90
+    location: -0.15,-1,0
+    type: normal
   Top4:
     small: 'true'
     item: wood_plate
-    angle: 90,-90,0
-    location: -0.15,-0.4,0
+    angle: -90,0,90
+    location: 0,-0.4,0.15
+    type: normal
+  Bottom2:
+    small: 'true'
+    item: wood_plate
+    angle: 90,0,90
+    location: 0,-1,-0.15
     type: normal
   Top3:
     small: 'true'
     item: wood_plate
-    angle: 90,180,0
-    location: 0,-0.4,0.15
+    angle: 180,0,90
+    location: 0.15,-0.4,0
     type: normal
   Top2:
     small: 'true'
     item: wood_plate
-    angle: 90,90,0
-    location: 0.15,-0.4,0
+    angle: 90,0,90
+    location: 0,-0.4,-0.15
     type: normal
   Top1:
     small: 'true'
     item: wood_plate
-    angle: 90,0,0
-    location: 0,-0.4,-0.15
+    angle: 0,0,90
+    location: -0.15,-0.4,0
     type: normal
   Cap2:
     small: 'true'
