@@ -742,8 +742,8 @@ dFE_World:
     # Listener for sitting components in placed Models.
     on player right clicks at entity:
       - determine passively cancelled
-      - define entity <context.entity.location.find.entities[armor_stand].within[1.2].filter[has_flag[dFE_Sit]].get[1]>
-      - if <def[entity]||null> == null {
+      - define entity <context.entity.location.find.entities[armor_stand].within[1.2].filter[has_flag[dFE_Sit]].get[1]||null>
+      - if <def[entity]> == null {
         - queue clear
       }
       - if <def[entity].has_passenger> && <def[entity].passenger.is[!=].to[<player>]||false> {
@@ -765,7 +765,7 @@ dFE_World:
       
     # Hourly backups to avoid data loss on server crash. Also BC's script-tracker.
     on system time hourly:
-      - webget "http://stats.denizenscript.com/tracker?script=98&players=<server.list_online_players.size>&script_version=0.8.2&models=<yaml[dFE_Models].read[Models].size>&placed_props=<yaml[dFE_Placed_Props].list_keys[].size>&tps=<server.recent_tps>"
+      - webget "http://stats.denizenscript.com/tracker?script=98&players=<server.list_online_players.size>&script_version=0.8.2&models=<yaml[dFE_Models].read[Models].size||0>&placed_props=<yaml[dFE_Placed_Props].list_keys[].size||0>&tps=<server.recent_tps>"
       
       - foreach li@Models|Placed_Props {
         - yaml "savefile:/dFurnitureEditor/dFE_<def[value]>.yml" id:dFE_<def[value]>
