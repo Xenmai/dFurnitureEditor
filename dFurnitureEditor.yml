@@ -704,7 +704,45 @@ dFE_World:
         - flag player dFE.DeletePart:! 
         - inventory open d:in@Model_Menu 
       } 
-       
+
+      # Enter element type. 
+      else if <player.has_flag[dFE.SetType]> { 
+        - determine passively cancelled 
+        - if <li@normal|sit|fire.contains[<context.message>].not> { 
+          - narrate "Invalid element type! Valid types are normal, sit and fire." 
+          - queue clear 
+        } 
+        - if <context.message> == normal { 
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.angle:0,0,0
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small:false
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.offset:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.quantity:!
+        }
+        else if <context.message> == sit { 
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.angle:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:0
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.offset:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.quantity:!
+        }
+        else if <context.message> == fire { 
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.angle:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.small:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.offset:0,0,0
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.quantity:1
+        } 
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type:<context.message> 
+        - narrate "Element type set to <context.message>!" 
+        - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly 
+        - flag player dFE.SetType:! 
+        - inventory open d:in@Part_Menu 
+      } 
+
       # Enter location offset value as x,y,z. 
       else if <player.has_flag[dFE.SetLocation]> { 
         - determine passively cancelled 
@@ -739,21 +777,13 @@ dFE_World:
         - inventory open d:in@Part_Menu 
       } 
        
-      # Enter element type. 
-      else if <player.has_flag[dFE.SetType]> { 
+      # Enter yaw value as decimal. 
+      else if <player.has_flag[dFE.SetYaw]> { 
         - determine passively cancelled 
-        - if <li@normal|sit|fire.contains[<context.message>].not> { 
-          - narrate "Invalid element type! Valid types are normal, sit and fire." 
-          - queue clear 
-        } 
-        - if <li@sit|fire.contains[<context.message>]> { 
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air 
-          - narrate "Element item set to air!" 
-        } 
-        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type:<context.message> 
-        - narrate "Element type set to <context.message>!" 
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:<context.message> 
+        - narrate "Yaw set to <context.message>!" 
         - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly 
-        - flag player dFE.SetType:! 
+        - flag player dFE.SetYaw:! 
         - inventory open d:in@Part_Menu 
       } 
      
