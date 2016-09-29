@@ -216,37 +216,37 @@ Table:
     small: 'false'
     item: trap_door
     angle: 0,0,0
-    location: 0.1,-0.8,0.1
+    location: 0.1,-1.2,0.1
     type: normal
   Plank4:
     small: 'true'
     item: wood_plate
     angle: 0,0,0
-    location: -0.19140625,0,-0.19140625
+    location: -0.19140625,-0.4,-0.19140625
     type: normal
   Plank3:
     small: 'true'
     item: wood_plate
     angle: 0,0,0
-    location: -0.19140625,0,0.19140625
+    location: -0.19140625,-0.4,0.19140625
     type: normal
   Plank2:
     small: 'true'
     item: wood_plate
     angle: 0,0,0
-    location: 0.19140625,0,-0.19140625
+    location: 0.19140625,-0.4,-0.19140625
     type: normal
   Plank8:
     small: 'false'
     item: trap_door
     angle: 0,0,0
-    location: -0.1,-0.8,-0.1
+    location: -0.1,-1.2,-0.1
     type: normal
   Plank7:
     small: 'false'
     item: trap_door
     angle: 0,0,0
-    location: -0.1,-0.8,0.1
+    location: -0.1,-1.2,0.1
     type: normal
   Leg1:
     small: 'false'
@@ -258,13 +258,13 @@ Table:
     small: 'false'
     item: trap_door
     angle: 0,0,0
-    location: 0.1,-0.8,0.1
+    location: 0.1,-1.2,0.1
     type: normal
   Plank1:
     small: 'true'
     item: wood_plate
     angle: 0,0,0
-    location: 0.19140625,0,0.19140625
+    location: 0.19140625,-0.4,0.19140625
     type: normal
   Foot:
     small: 'false'
