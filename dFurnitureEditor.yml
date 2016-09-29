@@ -834,7 +834,21 @@ Model_Menu:
   - define items "li@i@blue_wool[display_name=<&b>Create a new part]|i@red_wool[display_name=<&b>Delete a part]" 
   - if <yaml[dFE_Models].list_keys[<player.flag[dFE.Editing1]>].as_list.alphanumeric||null> != null { 
     - foreach <yaml[dFE_Models].list_keys[<player.flag[dFE.Editing1]>].as_list.alphanumeric> { 
-      - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Location: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.location]>|<&d>Angle: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.angle]>|<&d>Small: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.small]>|<&d>Item: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.item]>|<&d>Type: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]>]]>"  
+      - if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]> == "normal" { 
+        - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Type: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]>|<&d>Location: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.location]>|<&d>Angle: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.angle]>|<&d>Small: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.small]>|<&d>Item: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.item]>]]>"  
+      } 
+      else if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]> == "sit" { 
+        - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Type: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]>|<&d>Location: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.location]>|<&d>Yaw: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.yaw]>]]>"  
+      } 
+      else if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]> == "fire" { 
+        - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Type: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]>|<&d>Location: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.location]>|<&d>Offset: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.offset]>|<&d>Quantity: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.quantity]>]]>"  
+      } 
+      else if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]> == "banner" { 
+        # TODO - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Type: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]>|<&d>Location: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.location]>|<&d>Angle: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.angle]>|<&d>Small: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.small]>|<&d>Item: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.item]>]]>"  
+      } 
+      else if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]> == "container" { 
+        # TODO - define items "<def[items].include[i@armor_stand[display_name=<&b><def[value]>;lore=<&d>Type: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.type]>|<&d>Location: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.location]>|<&d>Angle: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.angle]>|<&d>Small: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.small]>|<&d>Item: <&5><&o><yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<def[value]>.item]>]]>"  
+      } 
     } 
   } 
   - determine <def[items]> 
@@ -858,10 +872,10 @@ Part_Menu:
     - define items "li@i@paper[display_name=<&b>Type;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]|i@paper[display_name=<&b>Location;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.location]>]|i@paper[display_name=<&b>Offset;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.offset]>]|i@paper[display_name=<&b>Quantity;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.quantity]>]" 
   } 
   else if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]> == "banner" { 
-    - define items "li@i@paper[display_name=<&b>Type;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]|i@paper[display_name=<&b>Location;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.location]>]" 
+    # TODO - define items "li@i@paper[display_name=<&b>Type;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]|i@paper[display_name=<&b>Location;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.location]>]" 
   } 
   else if <yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]> == "container" { 
-    - define items "li@i@paper[display_name=<&b>Type;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]|i@paper[display_name=<&b>Location;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.location]>]" 
+    # TODO - define items "li@i@paper[display_name=<&b>Type;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]|i@paper[display_name=<&b>Location;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.location]>]" 
   } 
    
   - determine <def[items]> 
