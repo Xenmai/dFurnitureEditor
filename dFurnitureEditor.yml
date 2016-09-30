@@ -679,11 +679,11 @@ dFE_World:
           - narrate "Part name already in use!" 
         } 
         else { 
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.type:normal 
           - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.location:0,0,0 
           - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.angle:0,0,0 
           - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.small:false 
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.item:stone 
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.type:normal 
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<context.message>.item:air 
           - narrate "Part <context.message> created!" 
         } 
         - flag player dFE.CreatePart:! 
