@@ -376,10 +376,3 @@ Chair:
     angle: 0,0,0
     location: 0,-1.6,0
     type: sit
-Models:
-- Stool
-- Log
-- Chair
-- Table
-- Campfire
-- Barrel

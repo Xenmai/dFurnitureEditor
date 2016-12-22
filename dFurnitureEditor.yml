@@ -207,7 +207,7 @@ dFE_Task_Place:
   definitions: loc|yaw|model
   script:
 
-  - if <yaml[dFE_Models].read[Models].contains[<def[model]>].not> {
+  - if <yaml[dFE_Models].list_keys[].contains[<def[model]>].not> {
     - narrate "Model with name <def[model]> doesn't exist. Make sure you're specifying the correct model."
     - queue clear
   }
@@ -355,7 +355,7 @@ dFE_Task_Edit:
     - queue clear
   }
 
-  - if <yaml[dFE_Models].read[Models].contains[<def[model]>].not> {
+  - if <yaml[dFE_Models].list_keys[].contains[<def[model]>].not> {
     - narrate "Model with name <def[model]> doesn't exist. Make sure you're specifying the correct model."
     - queue clear
   }
@@ -641,11 +641,11 @@ dFE_World:
           - narrate "Prop names must be alphanumerical & _, please try again with a valid name."
           - queue clear
         }
-        - if <yaml[dFE_Models].read[Models].contains[<context.message>]> {
+        - if <yaml[dFE_Models].list_keys[].contains[<context.message>]> {
           - narrate "Prop name <context.message> already in use!"
         }
         else {
-          - yaml id:dFE_Models set Models:->:<context.message>
+          - yaml id:dFE_Models set <context.message>
           - narrate "Prop <context.message> created!"
         }
         - flag player dFE.CreateProp:!
@@ -655,8 +655,7 @@ dFE_World:
       # Enter name of prop to delete.
       else if <player.has_flag[dFE.DeleteProp]> {
         - determine passively cancelled
-        - if <yaml[dFE_Models].read[Models].contains[<context.message>]> {
-          - yaml id:dFE_Models set Models:<-:<context.message>
+        - if <yaml[dFE_Models].list_keys[].contains[<context.message>]> {
           - yaml id:dFE_Models set <context.message>:!
           - narrate "Prop <context.message> deleted!"
         }
@@ -783,7 +782,7 @@ dFE_World:
 
     # Hourly backups to avoid data loss on server crash. Also BC's script-tracker.
     on system time hourly:
-      - webget "http://stats.denizenscript.com/tracker?script=98&players=<server.list_online_players.size>&script_version=0.8.2&models=<yaml[dFE_Models].read[Models].size>&placed_props=<yaml[dFE_Placed_Props].list_keys[].size>&tps=<server.recent_tps>"
+      - webget "http://stats.denizenscript.com/tracker?script=98&players=<server.list_online_players.size>&script_version=0.8.2&models=<yaml[dFE_Models].list_keys[].size>&placed_props=<yaml[dFE_Placed_Props].list_keys[].size>&tps=<server.recent_tps>"
 
       - foreach li@dFE_Models|dFE_Placed_Props {
         - yaml "savefile:/dFurnitureEditor/<def[value]>.yml" id:dFE_<def[value]>
@@ -812,7 +811,7 @@ Editor_Menu:
   - "[] [] [] [] [] [] [] [] []"
   procedural items:
   - define items "li@i@blue_wool[display_name=<&b>Create a new prop]|i@red_wool[display_name=<&b>Delete a prop]"
-  - foreach <yaml[dFE_Models].read[Models].as_list.alphanumeric||li@> {
+  - foreach <yaml[dFE_Models].list_keys[].as_list.alphanumeric||li@> {
     - define items "<def[items].include[i@workbench[display_name=<&b><def[value]>;lore=<&d>Parts:|<yaml[dFE_Models].list_keys[<def[value]>].as_list.alphanumeric.after[li@]||None>]]>"
   }
   - determine <def[items]>
