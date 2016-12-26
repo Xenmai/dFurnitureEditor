@@ -770,18 +770,6 @@ dFE_World:
         - define id <def[entity].flag[dFE.ID]>
         - define time <yaml[dFE_Models].read[<yaml[dFE_Placed_Props].read[<def[id]>.model]>.time]>
         - run dFE_Task_Fire def:<def[entity]>|<def[time]> instantly
-    
-    # Listener for fire components in placed Models.
-    on system time minutely:
-    
-    - foreach <yaml[dFE_Placed_Props].list_keys[]> {
-      - foreach <yaml[dFE_Placed_Props].read[<def[value]>.entities]> {
-        - define entity <def[value]>
-        - if <def[entity].has_flag[dFE.Fire]> {
-          - run dFE_Task_Fire def:<def[entity]> instantly
-        }
-      }
-    }
 
     # Hourly backups to avoid data loss on server crash. Also BC's script-tracker.
     on system time hourly:
