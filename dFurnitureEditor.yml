@@ -732,10 +732,10 @@ dFE_World:
       } else if <context.message> == sit {
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
-        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:0
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:0.0
       } else if <context.message> == fire {
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
-        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:15
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:15.0
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:!
       } else {
         - narrate "Invalid element type! Use normal, sit or fire."

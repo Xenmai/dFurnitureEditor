@@ -161,7 +161,7 @@ Campfire:
     angle: 0,0,0
     location: 0,-1.3,0
     type: fire
-    time: 10
+    time: 10.0
   Stick8:
     small: 'true'
     item: stick
@@ -204,6 +204,7 @@ Stool:
     angle: 0,0,0
     location: 0,-1.65,0
     type: sit
+    yaw: 0.0
 Table:
   Leg2:
     small: 'false'
@@ -277,16 +278,19 @@ Log:
     angle: 0,0,0
     location: 0,-1.6,-1
     type: sit
+    yaw: 0.0
   Sit2:
     small: 'false'
     angle: 0,0,0
     location: 0,-1.6,0
     type: sit
+    yaw: 0.0
   Sit1:
     small: 'false'
     angle: 0,0,0
     location: 0,-1.6,1
     type: sit
+    yaw: 0.0
   Log4:
     small: 'false'
     item: log
@@ -371,3 +375,4 @@ Chair:
     angle: 0,0,0
     location: 0,-1.6,0
     type: sit
+    yaw: 0.0
