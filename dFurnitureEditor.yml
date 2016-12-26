@@ -16,7 +16,7 @@ dFurnitureEditor_Version:
 #                                                                        |_|
 dFE_Command:
   type: command
-  debug: false
+  debug: true
   name: dfe
   description: "Main dFE command. Allows for editing and placing Models."
   usage: /dfe [edit|place]
@@ -149,17 +149,14 @@ dFE_Command:
     # For example, '/dfe place Stool -p' will place a Stool model with your yaw.
     - case place:
       - if <context.args.size.is[!=].to[3]> {
-        - narrate "Invalid number of arguments specified. Proper usage is '/dfe place [<&lt>model<&gt>] [-p/#.##]'."
+        - narrate "Invalid number of arguments specified. Proper usage is '/dfe place [<&lt>model<&gt>] [-p/#.#]'."
         - queue clear
       }
-
-      - if <context.args.get[3].round_to[2]||false> || <context.args.get[3].is[==].to[<context.args.get[3].as_int||null>]> {
-        - run dFE_Task_Place def:<player.location.block>|<context.args.get[3].round_to[2]>|<context.args.get[2]> instantly
-      }
-      else if <context.args.get[3].is[==].to[-p]> {
+      - if <context.args.get[3].is[==].to[-p]> {
         - run dFE_Task_Place def:<player.location.block>|<player.location.yaw>|<context.args.get[2]> instantly
-      }
-      else {
+      } else if <context.args.get[3].round_to[2]||false> || <context.args.get[3].is[==].to[<context.args.get[3].as_int||null>]> {
+        - run dFE_Task_Place def:<player.location.block>|<context.args.get[3].round_to[2]>|<context.args.get[2]> instantly
+      } else {
         - narrate "Invalid third argument specified. Please use -p or a number."
       }
 
@@ -170,17 +167,13 @@ dFE_Command:
         - narrate "Invalid number of arguments specified. Proper usage is '/dfe remove [-s/-t/#]'."
         - queue clear
       }
-
       - if <context.args.get[2].is[==].to[-s]> {
         - run dFE_Task_Remove def:<player.flag[dFE_Selection]> instantly
-      }
-      else if <context.args.get[2].is[==].to[-t]> {
+      } else if <context.args.get[2].is[==].to[-t]> {
         - run dFE_Task_Remove def:<player.target.flag[dFE.ID]> instantly
-      }
-      else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> && <context.args.get[2].is[MORE].to[0]> {
+      } else if <context.args.get[2].is[==].to[<context.args.get[2].as_int||null>]> && <context.args.get[2].is[MORE].to[0]> {
         - run dFE_Task_Remove def:<context.args.get[2]> instantly
-      }
-      else {
+      } else {
         - narrate "Invalid second argument specified. Please use -s, -t or a positive integer."
       }
     # Changes the placed prop with an old ID to a new one.
@@ -189,7 +182,6 @@ dFE_Command:
         - narrate "Invalid number of arguments specified. Proper usage is '/dfe changeid [#] [#]'."
         - queue clear
       }
-
       - run dFE_Task_ChangeId def:<context.args.get[2]>|<context.args.get[3]> instantly
 
 #  _______        _       _____           _       _
@@ -217,11 +209,9 @@ dFE_Task_Place:
   - while <yaml[dFE_Placed_Props].list_keys[].contains[<def[id]>]> {
     - define id <def[id].add[1]>
   }
-
   - yaml id:dFE_Placed_Props set <def[id]>.location:<def[loc]>
   - yaml id:dFE_Placed_Props set <def[id]>.yaw:<def[yaw]>
   - yaml id:dFE_Placed_Props set <def[id]>.model:<def[model]>
-
   - foreach <yaml[dFE_Models].list_keys[<def[model]>]> {
     - define location l@<yaml[dFE_Models].read[<def[model]>.<def[value]>.location]>
     - define angle <yaml[dFE_Models].read[<def[model]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]||0,0,0>
@@ -229,16 +219,17 @@ dFE_Task_Place:
     - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]||air>
     - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
     - define sityaw <yaml[dFE_Models].read[<def[model]>.<def[value]>.yaw]||0>
-    - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw].add[<def[sityaw]>]>]> save:<yaml[dFE_Models].read[<def[model]>]>
+    - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw].add[<def[sityaw]>]>]> save:entity
     - if <def[type].is[==].to[sit]> {
-      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Sit
-      - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
+      - flag <entry[entity].spawned_entities.after[li@]> dFE.Utility:Sit
+      - adjust <entry[entity].spawned_entities.after[li@]> marker:false
     } else if <def[type].is[==].to[fire]> {
-      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Fire
-      - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
+      - flag <entry[entity].spawned_entities.after[li@]> dFE.Utility:Fire
+      - flag <entry[entity].spawned_entities.after[li@]> dFE.Burn_Time:<yaml[dFE_Models].read[<def[model]>.<def[value]>.time]>
+      - adjust <entry[entity].spawned_entities.after[li@]> marker:false
     }
-    - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.ID:<def[id]>
-    - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]>
+    - flag <entry[entity].spawned_entities.after[li@]> dFE.ID:<def[id]>
+    - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[entity].spawned_entities.after[li@]>
   }
   - narrate "Placed <def[model]> at location <def[loc].simple> with ID <def[id]>."
 
@@ -421,19 +412,20 @@ dFE_Task_Update:
         - define location l@<yaml[dFE_Models].read[<def[model]>.<def[value]>.location]>
         - define angle <yaml[dFE_Models].read[<def[model]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]>
         - define small <yaml[dFE_Models].read[<def[model]>.<def[value]>.small]>
-        - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]>
+        - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]||air>
         - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
         - define sityaw <yaml[dFE_Models].read[<def[model]>.<def[value]>.yaw]||0>
-        - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw].add[<def[sityaw]>]>]> save:<yaml[dFE_Models].read[<def[model]>]> save:<yaml[dFE_Models].read[<def[model]>]>
+        - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw].add[<def[sityaw]>]>]> save:entity
         - if <def[type].is[==].to[sit]> {
-          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Sit
-          - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
+          - flag <entry[entity].spawned_entities.after[li@]> dFE.Utility:Sit
+          - adjust <entry[entity].spawned_entities.after[li@]> marker:false
         } else if <def[type].is[==].to[fire]> {
-          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Fire
-          - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
+          - flag <entry[entity].spawned_entities.after[li@]> dFE.Utility:Fire
+          - flag <entry[entity].spawned_entities.after[li@]> dFE.Burn_Time:<yaml[dFE_Models].read[<def[model]>.<def[value]>.time]>
+          - adjust <entry[entity].spawned_entities.after[li@]> marker:false
         }
-        - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.ID:<def[id]>
-        - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]>
+        - flag <entry[entity].spawned_entities.after[li@]> dFE.ID:<def[id]>
+        - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[entity].spawned_entities.after[li@]>
       }
     }
   }
@@ -455,7 +447,7 @@ dFE_Task_Fire:
       - queue clear
     }
     - if <def[entity].location.find.entities[player].within[16].size.is[MORE].than[0]> {
-      - playeffect <def[entity].location> effect:flame data:0.001 quantity:<yaml[dFE_Models].read[<yaml[dFE_Placed_Props].read[<def[entity].flag[dFE.ID]>.model]>.quantity]> offset:<yaml[dFE_Models].read[<yaml[dFE_Placed_Props].read[<def[entity].flag[dFE.ID]>.model]>.offset]>
+      - playeffect <def[entity].location> effect:flame data:0.001 quantity:<yaml[dFE_Models].read[<yaml[dFE_Placed_Props].read[<def[entity].flag[dFE.ID]>.model]>.quantity]> offset:0.05,0.05,0.05
     }
     - wait 10t
   }
@@ -469,7 +461,7 @@ dFE_Task_Fire:
 #                                                   |_|
 dFE_World:
   type: world
-  debug: false
+  debug: true
   events:
 
     # Loads the files, or creates them if it doesn't exist yet.
@@ -490,6 +482,7 @@ dFE_World:
     
     - foreach li@dFE_Models|dFE_Placed_Props {
       - if <server.has_file[/dFurnitureEditor/<def[value]>.yml]> {
+        - yaml "savefile:/dFurnitureEditor/<def[value]>.yml" id:<def[value]>
         - yaml "load:/dFurnitureEditor/<def[value]>.yml" id:<def[value]>
       }
       else {
@@ -752,7 +745,7 @@ dFE_World:
     on player right clicks at entity:
     
     - determine passively cancelled
-    - foreach <context.entity.location.find.entities[armor_stand].within[1.2].filter[has_flag[dFE.Utility]> {
+    - foreach <context.entity.location.find.entities[armor_stand].within[2].filter[has_flag[dFE.Utility]]> {
       - if <context.entity.flag[dFE.ID]> == <def[value].flag[dFE.ID]> {
         - define entity <def[value]>
       }
@@ -764,13 +757,12 @@ dFE_World:
           - narrate "That position is already occupied by another person!"
           - queue clear
         }
-        - mount <player>|<def[entity]> <def[entity].location.with_pose[0,<player.location.yaw.add[180]>]>
+        - mount <player>|<def[entity]> <def[entity].location>
       
       - case "Fire":
-        - define id <def[entity].flag[dFE.ID]>
-        - define time <yaml[dFE_Models].read[<yaml[dFE_Placed_Props].read[<def[id]>.model]>.time]>
-        - run dFE_Task_Fire def:<def[entity]>|<def[time]> instantly
-
+        - define time <def[entity].flag[dFE.Burn_Time]>
+        - run dFE_Task_Fire def:<def[entity]>|<def[time].as_int> instantly
+        
     # Hourly backups to avoid data loss on server crash. Also BC's script-tracker.
     on system time hourly:
     
