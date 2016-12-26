@@ -158,10 +158,10 @@ Campfire:
     type: normal
   Fire:
     small: 'false'
-    item: air
     angle: 0,0,0
     location: 0,-1.3,0
     type: fire
+    time: 10
   Stick8:
     small: 'true'
     item: stick
@@ -201,7 +201,6 @@ Stool:
     type: normal
   Sit:
     small: 'false'
-    item: air
     angle: 0,0,0
     location: 0,-1.65,0
     type: sit
@@ -275,19 +274,16 @@ Table:
 Log:
   Sit3:
     small: 'false'
-    item: air
     angle: 0,0,0
     location: 0,-1.6,-1
     type: sit
   Sit2:
     small: 'false'
-    item: air
     angle: 0,0,0
     location: 0,-1.6,0
     type: sit
   Sit1:
     small: 'false'
-    item: air
     angle: 0,0,0
     location: 0,-1.6,1
     type: sit
@@ -372,7 +368,6 @@ Chair:
     type: normal
   Sit:
     small: 'false'
-    item: air
     angle: 0,0,0
     location: 0,-1.6,0
     type: sit
