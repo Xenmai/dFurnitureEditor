@@ -16,7 +16,7 @@ dFurnitureEditor_Version:
 #                                                                        |_|
 dFE_Command:
   type: command
-  debug: true
+  debug: false
   name: dfe
   description: "Main dFE command. Allows for editing and placing Models."
   usage: /dfe [edit|place]
@@ -461,7 +461,7 @@ dFE_Task_Fire:
 #                                                   |_|
 dFE_World:
   type: world
-  debug: true
+  debug: false
   events:
 
     # Loads the files, or creates them if it doesn't exist yet.
