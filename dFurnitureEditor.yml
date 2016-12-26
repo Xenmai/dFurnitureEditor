@@ -728,21 +728,19 @@ dFE_World:
         - narrate "Invalid element type! Valid types are normal, sit and fire."
         - queue clear
       }
-      - choose <context.message>:
-        
-        - case normal:
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
-        - case sit:
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
-        - case fire:
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
-          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:15
-        - default:
-          - narrate "Invalid element type! Use normal, sit or fire."
-          - queue clear
-      
+      - if <context.message> == normal {
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
+      } else if <context.message> == sit {
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
+      } else if <context.message> == fire {
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:15
+      } else {
+        - narrate "Invalid element type! Use normal, sit or fire."
+        - queue clear
+      }      
       - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type:<context.message>
       - narrate "Element type set to <context.message>!"
       - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
