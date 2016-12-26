@@ -211,7 +211,6 @@ dFE_Task_Place:
     - narrate "Model with name <def[model]> doesn't exist. Make sure you're specifying the correct model."
     - queue clear
   }
-
   - light <def[loc].below> <def[loc].light>
   - light <def[loc].below.below> <def[loc].light>
   - define id 1
@@ -230,14 +229,13 @@ dFE_Task_Place:
     - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]||air>
     - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
     - define sityaw <yaml[dFE_Models].read[<def[model]>.<def[value]>.yaw]||0>
-
     - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw].add[<def[sityaw]>]>]> save:<yaml[dFE_Models].read[<def[model]>]>
-
     - if <def[type].is[==].to[sit]> {
       - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Sit
       - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
     } else if <def[type].is[==].to[fire]> {
       - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Fire
+      - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
     }
     - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.ID:<def[id]>
     - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]>
@@ -259,7 +257,6 @@ dFE_Task_Remove:
     - narrate "Placed prop with ID <def[id]> doesn't exist. Make sure you're specifying the correct ID."
     - queue clear
   }
-
   - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below> reset
   - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below.below> reset
   - remove <yaml[dFE_Placed_Props].read[<def[id]>.entities]>
@@ -281,7 +278,6 @@ dFE_Task_Select:
     - narrate "Placed prop with ID <def[id]> doesn't exist. Make sure you're specifying the correct ID."
     - queue clear
   }
-
   - flag <player> dFE_Selection:<def[id]>
   - narrate "Selected <yaml[dFE_Placed_Props].read[<def[id]>.model]> with ID <def[id]>."
 
@@ -304,7 +300,6 @@ dFE_Task_Move:
     - narrate "Invalid location specified. Please use a dLocation."
     - queue clear
   }
-
   - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below> reset
   - light <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.below.below> reset
   - foreach <yaml[dFE_Placed_Props].read[<def[id]>.entities]> {
@@ -334,7 +329,6 @@ dFE_Task_Rotate:
     - narrate "Invalid yaw specified. Please use a number."
     - queue clear
   }
-
   - foreach <yaml[dFE_Placed_Props].read[<def[id]>.entities]> {
     - teleport <def[value]> <yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.center.add[<def[value].location.sub[<yaml[dFE_Placed_Props].read[<def[id]>.location].as_location.center>].rotate_around_y[<def[yaw].sub[<yaml[dFE_Placed_Props].read[<def[id]>.yaw]>].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]>
   }
@@ -353,7 +347,6 @@ dFE_Task_Edit:
     - inventory open d:in@Editor_Menu
     - queue clear
   }
-
   - if <yaml[dFE_Models].list_keys[].contains[<def[model]>].not> {
     - narrate "Model with name <def[model]> doesn't exist. Make sure you're specifying the correct model."
     - queue clear
@@ -364,7 +357,6 @@ dFE_Task_Edit:
     - inventory open d:in@Model_Menu
     - queue clear
   }
-
   - if <yaml[dFE_Models].list_keys[<def[model]>].contains[<def[part]>].not> {
     - narrate "Part with name <def[part]> doesn't exist. Make sure you're specifying the correct part."
     - queue clear
@@ -401,7 +393,6 @@ dFE_Task_ChangeId:
     - narrate "Placed prop with ID <def[new]> already exists. Make sure you're specifying an unused ID."
     - queue clear
   }
-
   - foreach <yaml[dFE_Placed_Props].list_keys[<def[old]>]> {
     - yaml id:dFE_Placed_Props set <def[new]>.<def[value]>:<yaml[dFE_Placed_Props].read[<def[old]>.<def[value]>]>
   }
@@ -421,36 +412,31 @@ dFE_Task_Update:
       - define model <yaml[dFE_Placed_Props].read[<def[value]>.model]>
       - define yaw <yaml[dFE_Placed_Props].read[<def[value]>.yaw]>
       - define id <def[value]>
-
       - remove <yaml[dFE_Placed_Props].read[<def[id]>.entities]>
       - yaml id:dFE_Placed_Props set <def[id]>:!
-
       - yaml id:dFE_Placed_Props set <def[id]>.location:<def[loc]>
       - yaml id:dFE_Placed_Props set <def[id]>.model:<def[model]>
       - yaml id:dFE_Placed_Props set <def[id]>.yaw:<def[yaw]>
-
       - foreach <yaml[dFE_Models].list_keys[<def[model]>]> {
         - define location l@<yaml[dFE_Models].read[<def[model]>.<def[value]>.location]>
         - define angle <yaml[dFE_Models].read[<def[model]>.<def[value]>.angle].split[,].as_list.parse[to_radians].separated_by[,]>
         - define small <yaml[dFE_Models].read[<def[model]>.<def[value]>.small]>
         - define item <yaml[dFE_Models].read[<def[model]>.<def[value]>.item]>
         - define type <yaml[dFE_Models].read[<def[model]>.<def[value]>.type]>
-
-        - spawn armor_stand[marker=false;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw]>]> save:<yaml[dFE_Models].read[<def[model]>]>
-
+        - define sityaw <yaml[dFE_Models].read[<def[model]>.<def[value]>.yaw]||0>
+        - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw].add[<def[sityaw]>]>]> save:<yaml[dFE_Models].read[<def[model]>]> save:<yaml[dFE_Models].read[<def[model]>]>
         - if <def[type].is[==].to[sit]> {
-          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Sit
+          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Sit
           - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
-        }
-        else if <def[type].is[==].to[fire]> {
-          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Fire
+        } else if <def[type].is[==].to[fire]> {
+          - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Fire
+          - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
         }
         - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.ID:<def[id]>
         - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]>
       }
     }
   }
-
   - narrate "Updated all placed props <def[model]> props."
 
 # Plays fire in an entity position for a minute.
@@ -632,12 +618,27 @@ dFE_World:
         - inventory close
         - narrate "Enter name of item to equip."
         - flag player dFE.SetItem
-
+      
+      - case "Time":
+        - inventory close
+        - if <context.click> == left {
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:++
+        } else if <context.click> == right {
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:--
+        }
+        - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
+        - inventory open d:in@Part_Menu
+        
       - case "Yaw":
         - inventory close
-        - narrate "Enter value of sitting yaw."
-        - flag player dFE.SetYaw
-
+        - if <context.click> == left {
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:++
+        } else if <context.click> == right {
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:--
+        }
+        - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
+        - inventory open d:in@Part_Menu
+        
     # Prevents dragging items.
     on player drags in Part_Menu:
 
@@ -685,7 +686,6 @@ dFE_World:
       }
       - flag player dFE.CreatePart:!
       - inventory open d:in@Model_Menu
-    }
 
     # Enter location offset value as x,y,z.
     } else if <player.has_flag[dFE.SetLocation]> {
@@ -695,20 +695,18 @@ dFE_World:
       - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
       - flag player dFE.SetLocation:!
       - inventory open d:in@Part_Menu
-    }
 
     # Enter head angle values as a,b,c.
-    else if <player.has_flag[dFE.SetAngle]> {
+    } else if <player.has_flag[dFE.SetAngle]> {
       - determine passively cancelled
       - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.angle:<context.message>
       - narrate "Rotation angle set to <context.message>!"
       - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
       - flag player dFE.SetAngle:!
       - inventory open d:in@Part_Menu
-    }
 
     # Enter item name to equip.
-    else if <player.has_flag[dFE.SetItem]> {
+    } else if <player.has_flag[dFE.SetItem]> {
       - determine passively cancelled
       - if <li@sit|fire.contains[<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type]>]> {
         - narrate "You can't give an item to a this type of element! Please change the element type to normal first."
@@ -719,10 +717,9 @@ dFE_World:
       - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
       - flag player dFE.SetItem:!
       - inventory open d:in@Part_Menu
-    }
 
     # Enter element type.
-    else if <player.has_flag[dFE.SetType]> {
+    } else if <player.has_flag[dFE.SetType]> {
       - determine passively cancelled
       - if <li@normal|sit|fire.contains[<context.message>].not> {
         - narrate "Invalid element type! Valid types are normal, sit and fire."
@@ -731,12 +728,15 @@ dFE_World:
       - if <context.message> == normal {
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:!
       } else if <context.message> == sit {
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:0
       } else if <context.message> == fire {
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
         - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:15
+        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.yaw:!
       } else {
         - narrate "Invalid element type! Use normal, sit or fire."
         - queue clear
@@ -837,7 +837,7 @@ Part_Menu:
   type: inventory
   debug: false
   inventory: chest
-  size: 9
+  size: 18
   title: "Part Menu"
   slots:
   - "[i@green_wool[display_name=<&b>Return]] [i@air] [i@red_wool[display_name=<&b>Delete Part]] [i@air] [] [] [] [] []"
@@ -845,6 +845,6 @@ Part_Menu:
   procedural items:
   - define items li@
   - foreach <yaml[dFE_Models].list_keys[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>].as_list.exclude[entities|marker].alphanumeric||li@> {
-    - define items <def[items].include[i@paper[display_name=<&b><def[value]>;lore=li<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.<def[value]>]>]]>
+    - define items <def[items].include[i@paper[display_name=<&b><def[value]>;lore=li@<yaml[dFE_Models].read[<player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.<def[value]>]>]]>
   }
   - determine <def[items]>
