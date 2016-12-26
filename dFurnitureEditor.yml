@@ -234,11 +234,10 @@ dFE_Task_Place:
     - spawn armor_stand[marker=true;max_health=0.1;visible=false;gravity=false;is_small=<def[small]>;equipment=air|air|air|<def[item]>;armor_pose=head|<def[angle]>] <def[loc].center.add[<def[location].rotate_around_y[<def[yaw].to_radians.mul[-1]>]>].with_pose[0,<def[yaw].add[<def[sityaw]>]>]> save:<yaml[dFE_Models].read[<def[model]>]>
 
     - if <def[type].is[==].to[sit]> {
-      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Sit
+      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Sit
       - adjust <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> marker:false
-    }
-    else if <def[type].is[==].to[fire]> {
-      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Fire
+    } else if <def[type].is[==].to[fire]> {
+      - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.Utility:Fire
     }
     - flag <entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]> dFE.ID:<def[id]>
     - yaml id:dFE_Placed_Props set <def[id]>.entities:->:<entry[<yaml[dFE_Models].read[<def[model]>]>].spawned_entities.after[li@]>
@@ -458,10 +457,14 @@ dFE_Task_Update:
 dFE_Task_Fire:
   type: task
   debug: true
-  definitions: entity
+  definitions: entity|time
   script:
 
-  - repeat 119 {
+  - if <def[time].is[==].to[<def[time].as_int>].not> || <def[time].is[LESS].than[1]> {
+    - narrate "Invalid time specified!"
+    - queue clear
+  }
+  - repeat <def[time].mul[2]> {
     - if <def[entity].is_spawned.not||true> {
       - queue clear
     }
@@ -514,7 +517,7 @@ dFE_World:
 
     - foreach li@dFE_Models|dFE_Placed_Props {
       - yaml "savefile:/dFurnitureEditor/<def[value]>.yml" id:<def[value]>
-      - yaml unload id::<def[value]>
+      - yaml unload id:<def[value]>
     }
 
     # Listener for the Editor Menu. Prevents clicking items.
@@ -725,10 +728,21 @@ dFE_World:
         - narrate "Invalid element type! Valid types are normal, sit and fire."
         - queue clear
       }
-      - if <li@sit|fire.contains[<context.message>]> {
-        - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air
-        - narrate "Element item set to air!"
-      }
+      - choose <context.message>:
+        
+        - case normal:
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:air
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
+        - case sit:
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:!
+        - case fire:
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.item:!
+          - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.time:15
+        - default:
+          - narrate "Invalid element type! Use normal, sit or fire."
+          - queue clear
+      
       - yaml id:dFE_Models set <player.flag[dFE.Editing1]>.<player.flag[dFE.Editing2]>.type:<context.message>
       - narrate "Element type set to <context.message>!"
       - run dFE_Task_Update def:<player.flag[dFE.Editing1]> instantly
@@ -740,16 +754,25 @@ dFE_World:
     on player right clicks at entity:
     
     - determine passively cancelled
-    - define entity <context.entity.location.find.entities[armor_stand].within[1.2].filter[has_flag[dFE.Sit]].get[1]>
-    - if <def[entity]||null> == null {
-      - queue clear
+    - foreach <context.entity.location.find.entities[armor_stand].within[1.2].filter[has_flag[dFE.Utility]> {
+      - if <context.entity.flag[dFE.ID]> == <def[value].flag[dFE.ID]> {
+        - define entity <def[value]>
+      }
     }
-    - if <def[entity].has_passenger> && <def[entity].passenger.is[!=].to[<player>]||false> {
-      - narrate "That position is already occupied by another person!"
-      - queue clear
-    }
-    - mount <player>|<def[entity]> <def[entity].location.with_pose[0,<player.location.yaw.add[180]>]>
-
+    - choose <def[entity].flag[dFE.Utility]||null>:
+    
+      - case "Sit":
+        - if <def[entity].has_passenger> && <def[entity].passenger.is[!=].to[<player>]||false> {
+          - narrate "That position is already occupied by another person!"
+          - queue clear
+        }
+        - mount <player>|<def[entity]> <def[entity].location.with_pose[0,<player.location.yaw.add[180]>]>
+      
+      - case "Fire":
+        - define id <def[entity].flag[dFE.ID]>
+        - define time <yaml[dFE_Models].read[<yaml[dFE_Placed_Props].read[<def[id]>.model]>.time]>
+        - run dFE_Task_Fire def:<def[entity]>|<def[time]> instantly
+    
     # Listener for fire components in placed Models.
     on system time minutely:
     
