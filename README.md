@@ -19,10 +19,10 @@ For any questions regarding this script, or anything else, feel free to ping me 
 
 Usage:
 
-/dfe edit *opens the editor GUI
+/dfe edit -a *opens the main editor GUI
 
-/dfe place Stool *places the prop named Stool at your current location
+/dfe place Stool -p *places the prop named Stool at your current location with your current yaw
 
 /dfe place Stool 0 *places the prop named Stool at your current location with yaw 0
 
-/dfe remove Stool *removes the Stool at your current location 
+/dfe remove 3 *removes the placed prop with ID 3 
