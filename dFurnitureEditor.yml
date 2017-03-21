@@ -652,11 +652,12 @@ dFE_World:
         - narrate "Prop name <context.message> already in use!"
       }
       else {
-        - yaml id:dFE_Models set <context.message>
+        - yaml id:dFE_Models set <context.message>:empty
         - narrate "Prop <context.message> created!"
       }
       - flag player dFE.CreateModel:!
-      - inventory open d:in@Editor_Menu
+      - flag player dFE.Editing1:<context.message>
+      - inventory open d:in@Model_Menu
       
     # Enter name for the new part.
     } else if <player.has_flag[dFE.CreatePart]> {
@@ -678,7 +679,8 @@ dFE_World:
         - narrate "Part <context.message> created!"
       }
       - flag player dFE.CreatePart:!
-      - inventory open d:in@Model_Menu
+      - flag player dFE.Editing2:<context.message>
+      - inventory open d:in@Part_Menu
 
     # Enter location offset value as x,y,z.
     } else if <player.has_flag[dFE.SetLocation]> {
@@ -805,7 +807,7 @@ Model_Menu:
   debug: false
   inventory: chest
   size: 54
-  title: "Prop Menu"
+  title: "Model: <player.flag[dFE.Editing1]>"
   slots:
   - "[i@green_wool[display_name=<&b>Return]] [i@air] [i@red_wool[display_name=<&b>Delete Model]] [i@air] [i@blue_wool[display_name=<&b>Create Part]] [i@air] [] [] []"
   - "[i@air] [i@air] [i@air] [i@air] [i@air] [i@air] [] [] []"
@@ -830,7 +832,7 @@ Part_Menu:
   debug: false
   inventory: chest
   size: 18
-  title: "Part Menu"
+  title: "Model: <player.flag[dFE.Editing1]> Part: <player.flag[dFE.Editing2]>"
   slots:
   - "[i@green_wool[display_name=<&b>Return]] [i@air] [i@red_wool[display_name=<&b>Delete Part]] [i@air] [] [] [] [] []"
   - "[i@air] [i@air] [i@air] [i@air] [] [] [] [] []"
